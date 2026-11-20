@@ -96,7 +96,7 @@ export function StoreHeader() {
                 type="button"
                 variant="ghost"
                 className={cn(
-                  "size-9 shrink-0 text-foreground/80 hover:bg-muted hover:text-foreground md:h-11 md:w-auto md:flex-col md:gap-0.5 md:px-3 md:text-[11px] md:font-medium"
+                  "hidden size-9 shrink-0 text-foreground/80 hover:bg-muted hover:text-foreground md:h-11 md:w-auto md:flex-col md:gap-0.5 md:px-3 md:text-[11px] md:font-medium lg:flex"
                 )}
                 aria-label="Account menu"
               >
@@ -110,7 +110,7 @@ export function StoreHeader() {
                 variant="ghost"
                 size="icon"
                 className={cn(
-                  "size-9 shrink-0 text-foreground/80 hover:bg-muted hover:text-foreground md:h-11 md:w-auto md:flex-col md:gap-0.5 md:px-3 md:text-[11px] md:font-medium"
+                  "hidden size-9 shrink-0 text-foreground/80 hover:bg-muted hover:text-foreground sm:flex md:h-11 md:w-auto md:flex-col md:gap-0.5 md:px-3 md:text-[11px] md:font-medium"
                 )}
               >
                 <Link href={wishlistLink.href} aria-label={wishlistLink.label}>

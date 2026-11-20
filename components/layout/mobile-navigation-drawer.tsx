@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation"
 import {
   Heart,
   LayoutGrid,
-  LogIn,
   Menu,
   UserRound,
   type LucideIcon,
@@ -18,6 +17,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -174,12 +174,23 @@ export function MobileNavigationDrawer({
         <Separator />
 
         <Link
-          href="/login"
+          href="/account"
           onClick={() => setOpen(false)}
-          className="flex items-center gap-3 rounded-sm border bg-card p-3 text-sm font-medium transition-colors hover:bg-muted/60"
+          className="flex items-center gap-3 rounded-sm bg-card p-3 transition-colors hover:bg-muted/60"
         >
-          <LogIn aria-hidden="true" className="size-5 text-muted-foreground" />
-          Login
+          <Avatar size="lg">
+            <AvatarFallback className="text-xs font-semibold">
+              YN
+            </AvatarFallback>
+          </Avatar>
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-sm font-semibold">
+              Your name
+            </span>
+            <span className="block truncate text-xs text-muted-foreground">
+              your@email.com
+            </span>
+          </span>
         </Link>
       </SheetContent>
     </Sheet>
