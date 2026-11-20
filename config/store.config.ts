@@ -1,19 +1,37 @@
-// config/store.config.ts
-
 /**
- * Centralized storefront branding and business information.
- * Customize this configuration separately for each client deployment.
+ * Storefront branding and public business information for this deployment.
+ * Customize this file for each client without changing shared UI components.
  */
-export const storeConfig = {
-    name: "Fashion House",
-    description: "Your trusted fashion store",
-    logo: "/images/logo.png",
-    contact: {
-        email: "support@example.com",
-        phone: "+8801XXXXXXXXX",
-    },
-    social: {
-        facebook: "",
-        instagram: "",
-    },
-};
+
+type StoreConfig = {
+  name: string
+  description: string
+  logo: string | null
+  contact: {
+    email: string
+    phone: string
+    address: string
+  }
+  social: {
+    facebook: string
+    instagram: string
+    youtube: string
+  }
+}
+
+export const storeConfig: StoreConfig = {
+  name: "Your Store",
+  description: "Your online shopping destination.",
+  // Set this to a file inside /public when the client provides a logo.
+  logo: null,
+  contact: {
+    email: "support@example.com",
+    phone: "",
+    address: "",
+  },
+  social: {
+    facebook: "",
+    instagram: "",
+    youtube: "",
+  },
+}
