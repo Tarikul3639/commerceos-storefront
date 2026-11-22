@@ -1,7 +1,8 @@
 import Link from "next/link"
 import { ArrowUpRight, Boxes, Store, Tags } from "lucide-react"
 
-import { HomeHero } from "@/features/home/components/home-hero"
+import { Banner } from "@/features/banner/components/banner"
+import { getBannerSlides } from "@/features/banner/api/banner.api"
 
 const discoveryLinks = [
   {
@@ -24,12 +25,18 @@ const discoveryLinks = [
   },
 ]
 
-export function HomePage() {
+/**
+ * Composes the public homepage and requests only its HOME_TOP placement.
+ * Other storefront sections can reuse the same API with their own position.
+ */
+export async function HomePage() {
+  const homeTopBanners = await getBannerSlides("HOME_TOP")
+
   return (
     <>
-      <HomeHero />
+      <Banner slides={homeTopBanners} />
 
-      <section className="border-t border-border/70 bg-muted/20">
+      <section className="bg-muted/20">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 md:py-20 lg:px-8">
           <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>

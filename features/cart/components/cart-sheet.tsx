@@ -25,7 +25,7 @@ export function CartSheet() {
           type="button"
           variant="ghost"
           aria-label="Open shopping cart"
-          className="size-9 shrink-0 text-foreground/80 hover:bg-muted hover:text-foreground md:h-11 md:w-auto md:flex-col md:gap-0.5 md:px-3 md:text-[11px] md:font-medium"
+          className="size-9 shrink-0 text-foreground/80 hover:bg-muted hover:text-primary md:h-11 md:w-auto md:flex-col md:gap-0.5 md:px-3 md:text-[11px] md:font-medium"
         >
           <ShoppingBag className="size-5" />
           <span className="hidden md:inline">Cart</span>
