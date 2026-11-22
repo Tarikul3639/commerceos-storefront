@@ -94,7 +94,7 @@ export function DesktopNavigation() {
           <NavigationMenuItem>
             <NavigationMenuTrigger>Categories</NavigationMenuTrigger>
             <NavigationMenuContent>
-              <ul className="grid w-136 grid-cols-2 gap-1 p-2">
+              <ul className="grid w-148 grid-cols-2 gap-1 p-2">
                 {featuredCategories.map((category) => (
                   <li key={category.href}>
                     <NavigationMenuLink asChild>

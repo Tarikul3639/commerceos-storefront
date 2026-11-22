@@ -91,17 +91,17 @@ export function StoreHeader() {
               />
             </div>
 
-            <div className="flex items-center gap-0.5 justify-self-end md:gap-1">
+            <div className="flex items-center gap-0.5 justify-self-end sm:gap-1">
               <Button
                 type="button"
                 variant="ghost"
                 className={cn(
-                  "hidden size-9 shrink-0 text-foreground/80 hover:bg-muted hover:text-primary md:h-11 md:w-auto md:flex-col md:gap-0.5 md:px-3 md:text-[11px] md:font-medium lg:flex"
+                  "hidden size-9 shrink-0 text-foreground/80 hover:bg-muted hover:text-primary md:h-11 sm:w-auto sm:flex-col sm:gap-0.5 sm:px-3 sm:text-[11px] sm:font-medium sm:flex"
                 )}
                 aria-label="Account menu"
               >
                 <UserRound className="size-5" />
-                <span>Account</span>
+               <span className="hidden md:inline">Account</span>
               </Button>
 
               <Button
