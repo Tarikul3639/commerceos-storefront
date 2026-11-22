@@ -64,7 +64,7 @@ export default async function CategoryDetailsPage({
 
         <div className="mb-8 flex items-center gap-4">
           {category.image ? (
-            <div className="relative size-16 shrink-0 overflow-hidden rounded-lg bg-muted sm:size-20">
+            <div className="relative size-16 shrink-0 overflow-hidden rounded bg-muted sm:size-20">
               <Image
                 src={category.image}
                 alt={category.name}

@@ -17,7 +17,7 @@ export function CategoryGrid({ categories }: { categories: StoreCategory[] }) {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
+    <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 xl:grid-cols-4">
       {categories.map((category, index) => {
         const featured = index === 0
 

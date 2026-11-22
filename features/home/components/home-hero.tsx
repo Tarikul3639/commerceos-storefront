@@ -10,7 +10,7 @@ export function HomeHero() {
   return (
     <section className="relative isolate overflow-hidden">
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top_right,var(--tw-gradient-stops))] from-primary/10 via-background to-background" />
-      <div className="mx-auto grid min-h-[620px] max-w-7xl items-center gap-12 px-4 py-20 sm:px-6 md:grid-cols-[1.05fr_0.95fr] md:py-28 lg:px-8">
+      <div className="mx-auto grid min-h-155 max-w-7xl items-center gap-12 px-4 py-20 sm:px-6 md:grid-cols-[1.05fr_0.95fr] md:py-28 lg:px-8">
         <motion.div
           initial={shouldReduceMotion ? false : { opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
@@ -55,7 +55,7 @@ export function HomeHero() {
           }
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.12, ease: "easeOut" }}
-          className="relative mx-auto w-full max-w-[520px]"
+          className="relative mx-auto w-full max-w-130"
           aria-hidden="true"
         >
           <div className="relative aspect-[4/4.2] overflow-hidden rounded-[2rem] border border-border/70 bg-muted/60 p-5 shadow-2xl shadow-primary/5 sm:p-7">
@@ -72,7 +72,7 @@ export function HomeHero() {
               <div className="relative flex flex-1 items-center justify-center py-8">
                 <div className="absolute size-56 rounded-full border border-border/80 sm:size-64" />
                 <div className="absolute size-44 rounded-full border border-dashed border-primary/30 sm:size-52" />
-                <div className="relative flex size-40 rotate-[-8deg] items-center justify-center rounded-[2rem] bg-gradient-to-br from-primary/90 to-primary shadow-xl shadow-primary/20 sm:size-48">
+                <div className="relative flex size-40 rotate-[-8deg] items-center justify-center rounded-[2rem] bg-linear-to-br from-primary/90 to-primary shadow-xl shadow-primary/20 sm:size-48">
                   <div className="flex size-24 rotate-[8deg] items-center justify-center rounded-3xl border border-primary-foreground/25 bg-primary-foreground/10 text-primary-foreground sm:size-28">
                     <Sparkles className="size-12" strokeWidth={1.2} />
                   </div>

@@ -1,6 +1,7 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import Autoplay from "embla-carousel-autoplay"
 import { useReducedMotion } from "motion/react"
 
 import {
@@ -19,17 +20,28 @@ const AUTOPLAY_MS = 6000
 
 /**
  * Displays backend-managed homepage campaigns in the shared shadcn carousel.
- * Autoplay pauses on hover/focus and respects reduced-motion preferences.
+ * Autoplay uses the Embla autoplay plugin: it pauses on hover/focus, keeps
+ * running after manual navigation, and is off for reduced-motion users.
  */
 export function Banner({ slides }: { slides: BannerSlideData[] }) {
   const [api, setApi] = useState<CarouselApi>()
   const [activeIndex, setActiveIndex] = useState(0)
-  const [isPaused, setIsPaused] = useState(false)
   const prefersReducedMotion = useReducedMotion()
 
-  const handleApi = useCallback((nextApi: CarouselApi) => {
-    setApi(nextApi)
-  }, [])
+  const hasMultiple = slides.length > 1
+
+  const plugins = useMemo(
+    () => [
+      Autoplay({
+        delay: AUTOPLAY_MS,
+        stopOnInteraction: false,
+        stopOnMouseEnter: true,
+        stopOnFocusIn: true,
+        playOnInit: hasMultiple && !prefersReducedMotion,
+      }),
+    ],
+    [hasMultiple, prefersReducedMotion]
+  )
 
   useEffect(() => {
     if (!api) return
@@ -46,41 +58,18 @@ export function Banner({ slides }: { slides: BannerSlideData[] }) {
     }
   }, [api])
 
-  useEffect(() => {
-    if (!api || isPaused || prefersReducedMotion || slides.length < 2) {
-      return
-    }
-
-    const intervalId = window.setInterval(() => api.scrollNext(), AUTOPLAY_MS)
-
-    return () => window.clearInterval(intervalId)
-  }, [api, isPaused, prefersReducedMotion, slides.length])
-
   if (slides.length === 0) return null
-
-  const hasMultiple = slides.length > 1
 
   return (
     <section
       aria-label="Featured campaigns"
-      className="mx-auto w-full max-w-7xl px-4 pt-4 sm:px-6 lg:px-8"
+      className="mx-auto w-full max-w-7xl px-2 pt-4 sm:px-4 lg:px-6"
     >
-      <div
-        className="group relative"
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
-        onFocusCapture={() => setIsPaused(true)}
-        onBlurCapture={(event) => {
-          if (
-            !event.currentTarget.contains(event.relatedTarget as Node | null)
-          ) {
-            setIsPaused(false)
-          }
-        }}
-      >
+      <div className="group relative">
         <Carousel
           opts={{ align: "start", loop: hasMultiple }}
-          setApi={handleApi}
+          plugins={plugins}
+          setApi={setApi}
           className="w-full"
         >
           <CarouselContent className="ml-0">
@@ -113,7 +102,7 @@ export function Banner({ slides }: { slides: BannerSlideData[] }) {
         </Carousel>
 
         {hasMultiple ? (
-          <div className="pointer-events-none absolute inset-x-0 bottom-3 z-20 flex justify-center sm:bottom-5 sm:justify-start sm:px-10 md:px-20">
+          <div className="pointer-events-none absolute inset-x-0 bottom-3 z-20 flex justify-start sm:bottom-5 px-5 md:px-20">
             <div
               role="group"
               aria-label="Choose campaign"
@@ -129,12 +118,12 @@ export function Banner({ slides }: { slides: BannerSlideData[] }) {
                     aria-label={`Go to campaign ${index + 1}`}
                     aria-current={isActive ? "true" : undefined}
                     onClick={() => api?.scrollTo(index)}
-                    className="flex h-6 items-center rounded-full px-1 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+                    className="flex h-4 sm:h-6 items-center rounded-full px-1 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
                   >
                     <span
                       className={cn(
-                        "block h-1.5 rounded-full transition-[width,background-color] duration-300 motion-reduce:transition-none",
-                        isActive ? "w-6 bg-white" : "w-1.5 bg-white/55"
+                        "block h-1 sm:h-1.5 rounded-full transition-[width,background-color] duration-300 motion-reduce:transition-none",
+                        isActive ? "w-4 sm:w-6 bg-white" : "w-1 sm:w-1.5 bg-white/55"
                       )}
                     />
                   </button>

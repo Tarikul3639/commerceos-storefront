@@ -25,9 +25,9 @@ export const storeConfig: StoreConfig = {
   // Set this to a file inside /public when the client provides a logo.
   logo: null,
   contact: {
-    email: "support@example.com",
-    phone: "",
-    address: "",
+    email: "support@commerceos.com",
+    phone: "+8801700000000",
+    address: "Dhaka, Bangladesh",
   },
   social: {
     facebook: "",
