@@ -126,7 +126,7 @@ export function StoreHeader() {
         </div>
       </header>
 
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full bg-card">
         <DesktopNavigation />
       </div>
       <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />

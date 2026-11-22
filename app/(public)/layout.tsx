@@ -1,7 +1,7 @@
 import type { ReactNode } from "react"
 
 import { Footer } from "@/components/layout/footer"
-import { StoreAnnouncement } from "@/components/layout/store-announcement"
+import { StoreAnnouncement } from "@/features/announcement/components/store-announcement"
 import { StoreHeader } from "@/components/layout/store-header"
 
 /**

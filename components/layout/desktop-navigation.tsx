@@ -85,7 +85,7 @@ export function DesktopNavigation() {
     pathname === href || pathname.startsWith(`${href}/`)
 
   return (
-    <div className="hidden md:grid">
+    <div className="hidden md:grid max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <NavigationMenu
         aria-label="Main navigation"
         className="h-11 max-w-none justify-start"
