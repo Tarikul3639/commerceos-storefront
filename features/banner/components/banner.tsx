@@ -79,7 +79,7 @@ export function Banner({ slides }: { slides: BannerSlideData[] }) {
                 className="pl-0"
                 aria-label={`${index + 1} of ${slides.length}`}
               >
-                <BannerSlide slide={slide} />
+                <BannerSlide slide={slide} priority={index === 0} />
               </CarouselItem>
             ))}
           </CarouselContent>
@@ -102,7 +102,7 @@ export function Banner({ slides }: { slides: BannerSlideData[] }) {
         </Carousel>
 
         {hasMultiple ? (
-          <div className="pointer-events-none absolute inset-x-0 bottom-3 z-20 flex justify-start sm:bottom-5 px-5 md:px-20">
+          <div className="pointer-events-none absolute inset-x-0 bottom-3 z-20 flex justify-start px-5 sm:bottom-5 md:px-20">
             <div
               role="group"
               aria-label="Choose campaign"
@@ -118,12 +118,14 @@ export function Banner({ slides }: { slides: BannerSlideData[] }) {
                     aria-label={`Go to campaign ${index + 1}`}
                     aria-current={isActive ? "true" : undefined}
                     onClick={() => api?.scrollTo(index)}
-                    className="flex h-4 sm:h-6 items-center rounded-full px-1 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+                    className="flex h-4 items-center rounded-full px-1 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none sm:h-6"
                   >
                     <span
                       className={cn(
-                        "block h-1 sm:h-1.5 rounded-full transition-[width,background-color] duration-300 motion-reduce:transition-none",
-                        isActive ? "w-4 sm:w-6 bg-white" : "w-1 sm:w-1.5 bg-white/55"
+                        "block h-1 rounded-full transition-[width,background-color] duration-300 motion-reduce:transition-none sm:h-1.5",
+                        isActive
+                          ? "w-4 bg-white sm:w-6"
+                          : "w-1 bg-white/55 sm:w-1.5"
                       )}
                     />
                   </button>

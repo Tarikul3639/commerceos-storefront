@@ -7,6 +7,7 @@ import { Heart, UserRound } from "lucide-react"
 
 import { DesktopNavigation } from "@/components/layout/desktop-navigation"
 import { MobileNavigationDrawer } from "@/components/layout/mobile-navigation-drawer"
+import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { CartSheet } from "@/features/cart/components/cart-sheet"
 import {
@@ -118,6 +119,8 @@ export function StoreHeader() {
                   <span className="hidden md:inline">{wishlistLink.label}</span>
                 </Link>
               </Button>
+
+              <ThemeToggle />
 
               {/* CartSheet owns the cart drawer interaction and contents. */}
               <CartSheet />

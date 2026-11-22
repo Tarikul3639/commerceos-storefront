@@ -5,6 +5,8 @@ export type StoreProduct = {
   name: string
   subDescription: string | null
   sellingPrice: string
+  originalPrice: string | null
+  discountPercentage: string | null
   categoryId: string
   brandId: string | null
   createdAt: string

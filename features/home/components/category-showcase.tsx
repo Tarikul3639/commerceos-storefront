@@ -1,10 +1,9 @@
-
 "use client"
 
+import { useMemo } from "react"
 import Image from "next/image"
-import Link from "next/link"
-import { useRef } from "react"
 import Autoplay from "embla-carousel-autoplay"
+import Link from "next/link"
 import { ArrowUpRight } from "lucide-react"
 
 import {
@@ -26,12 +25,17 @@ interface CategoryShowcaseProps {
  * Preserves the original category design and container spacing.
  */
 export function CategoryShowcase({ categories }: CategoryShowcaseProps) {
-  const autoplay = useRef(
-    Autoplay({
-      delay: 3000,
-      stopOnMouseEnter: true,
-      stopOnInteraction: false,
-    }),
+  const plugins = useMemo(
+    () => [
+      Autoplay({
+        delay: 3000,
+        stopOnInteraction: true,
+        stopOnMouseEnter: true,
+        stopOnFocusIn: true,
+        playOnInit: categories.length > 4,
+      }),
+    ],
+    [categories.length]
   )
 
   if (categories.length === 0) return null
@@ -41,7 +45,7 @@ export function CategoryShowcase({ categories }: CategoryShowcaseProps) {
       aria-labelledby="shop-by-category-heading"
       className="bg-background"
     >
-      <div className="mx-auto max-w-7xl px-4 pt-8 pb-10 sm:px-6 sm:pt-10 lg:px-8">
+      <div className="mx-auto max-w-7xl px-2 pt-8 pb-2 sm:pb-4 sm:px-4 sm:pt-10 lg:px-6">
         <div className="mb-5 flex items-end justify-between gap-4 sm:mb-6">
           <h2
             id="shop-by-category-heading"
@@ -58,7 +62,7 @@ export function CategoryShowcase({ categories }: CategoryShowcaseProps) {
             className="group inline-flex w-fit shrink-0 items-center gap-2 border-b border-foreground/20 pb-1 text-xs font-semibold text-foreground transition-colors hover:border-primary hover:text-primary"
           >
             Explore all
-            <ArrowUpRight className="size-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+            <ArrowUpRight className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </Link>
         </div>
 
@@ -66,15 +70,17 @@ export function CategoryShowcase({ categories }: CategoryShowcaseProps) {
           opts={{
             align: "start",
             loop: categories.length > 4,
+            dragFree: true,
+            containScroll: "trimSnaps",
           }}
-          plugins={[autoplay.current]}
+          plugins={plugins}
           className="group/carousel w-full"
         >
           <CarouselContent className="-ml-5 sm:-ml-7">
             {categories.map((category) => (
               <CarouselItem
                 key={category.id}
-                className="basis-auto shrink-0 pl-5 sm:pl-7"
+                className="shrink-0 basis-auto pl-5 sm:pl-7"
               >
                 <li className="list-none">
                   <Link
