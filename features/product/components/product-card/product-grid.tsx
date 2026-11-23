@@ -4,11 +4,13 @@ import type { ProductCardData } from "@/features/product/types/product.types"
 interface ProductGridProps {
   products: ProductCardData[]
   emptyMessage?: string
+  isHorizontal?: boolean
 }
 
 export function ProductGrid({
   products,
   emptyMessage = "No products found.",
+  isHorizontal = false,
 }: ProductGridProps) {
   if (products.length === 0) {
     return (
@@ -20,12 +22,19 @@ export function ProductGrid({
   }
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 sm:gap-4 lg:grid-cols-5">
+    <div
+      className={
+        isHorizontal
+          ? "grid grid-cols-2 sm:grid-cols-1 lg:grid-cols-2 gap-4"
+          : "grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5"
+      }
+    >
       {products.map((product, index) => (
         <ProductCard
           key={product.id}
           product={product}
           priority={index === 0}
+          isHorizontal={isHorizontal}
         />
       ))}
     </div>

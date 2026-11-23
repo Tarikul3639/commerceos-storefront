@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { ArrowUpRight } from "lucide-react"
 
-import { ProductGrid } from "@/features/product/components/product-grid"
+import { ProductGrid } from "@/features/product/components/product-card/product-grid"
 import type { StoreProduct } from "@/features/product/types/product.types"
 
 export function FeaturedProducts({ products }: { products: StoreProduct[] }) {

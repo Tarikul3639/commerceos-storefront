@@ -4,7 +4,7 @@ import { notFound } from "next/navigation"
 
 import { Banner } from "@/features/banner/components/banner"
 import { getBannerSlides } from "@/features/banner/api/banner.api"
-import { ProductGrid } from "@/features/product/components/product-grid"
+import { ProductGrid } from "@/features/product/components/product-card/product-grid"
 import { getStoreCategoryBySlug } from "@/features/categories/api/category.api"
 import { getCategoryProducts } from "@/features/product/api/product.api"
 
