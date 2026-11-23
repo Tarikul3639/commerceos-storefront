@@ -1,5 +1,5 @@
 import { serverApi } from "@/lib/api/server-api"
-import type { StoreProductsResponse } from "@/features/categories/api/product.api"
+import type { StoreProductsResponse } from "@/features/product/types/product.types"
 
 /** Fetch published products manually selected for the homepage. */
 export async function getHomeFeaturedProducts(): Promise<StoreProductsResponse> {

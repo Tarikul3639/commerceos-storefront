@@ -1,25 +1,5 @@
 import { serverApi } from "@/lib/api/server-api"
-
-export type StoreProduct = {
-  id: string
-  name: string
-  subDescription: string | null
-  sellingPrice: string
-  originalPrice: string | null
-  discountPercentage: string | null
-  categoryId: string
-  brandId: string | null
-  createdAt: string
-  images: string[]
-}
-
-export type StoreProductsResponse = {
-  data: StoreProduct[]
-  total: number
-  page: number
-  limit: number
-  totalPages: number
-}
+import type { StoreProductsResponse } from "@/features/product/types/product.types"
 
 export async function getCategoryProducts(
   categoryId: string,

@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Image from "next/image"
 import Autoplay from "embla-carousel-autoplay"
 import Link from "next/link"
@@ -12,6 +12,7 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
+  type CarouselApi,
 } from "@/components/ui/carousel"
 
 import type { StoreCategory } from "../types/category.types"
@@ -20,11 +21,10 @@ interface CategoryShowcaseProps {
   categories: StoreCategory[]
 }
 
-/**
- * Horizontal category carousel shown directly under the home banner.
- * Preserves the original category design and container spacing.
- */
 export function CategoryShowcase({ categories }: CategoryShowcaseProps) {
+  const [api, setApi] = useState<CarouselApi>()
+  const [canScroll, setCanScroll] = useState(false)
+
   const plugins = useMemo(
     () => [
       Autoplay({
@@ -38,6 +38,25 @@ export function CategoryShowcase({ categories }: CategoryShowcaseProps) {
     [categories.length]
   )
 
+  // Check actual carousel scroll availability
+  useEffect(() => {
+    if (!api) return
+
+    const updateScrollState = () => {
+      setCanScroll(api.canScrollPrev() || api.canScrollNext())
+    }
+
+    updateScrollState()
+
+    api.on("select", updateScrollState)
+    api.on("reInit", updateScrollState)
+
+    return () => {
+      api.off("select", updateScrollState)
+      api.off("reInit", updateScrollState)
+    }
+  }, [api])
+
   if (categories.length === 0) return null
 
   return (
@@ -45,7 +64,8 @@ export function CategoryShowcase({ categories }: CategoryShowcaseProps) {
       aria-labelledby="shop-by-category-heading"
       className="bg-background"
     >
-      <div className="mx-auto max-w-7xl px-2 pt-8 pb-2 sm:pb-4 sm:px-4 sm:pt-10 lg:px-6">
+      <div className="mx-auto max-w-7xl px-2 pt-8 pb-2 sm:px-4 sm:pt-10 sm:pb-4 lg:px-6">
+        {/* Section Header */}
         <div className="mb-5 flex items-end justify-between gap-4 sm:mb-6">
           <h2
             id="shop-by-category-heading"
@@ -66,7 +86,9 @@ export function CategoryShowcase({ categories }: CategoryShowcaseProps) {
           </Link>
         </div>
 
+        {/* Category Carousel */}
         <Carousel
+          setApi={setApi}
           opts={{
             align: "start",
             loop: categories.length > 4,
@@ -76,7 +98,7 @@ export function CategoryShowcase({ categories }: CategoryShowcaseProps) {
           plugins={plugins}
           className="group/carousel w-full"
         >
-          <CarouselContent className="-ml-5 sm:-ml-7">
+          <CarouselContent className="-ml-3 sm:-ml-5">
             {categories.map((category) => (
               <CarouselItem
                 key={category.id}
@@ -88,7 +110,7 @@ export function CategoryShowcase({ categories }: CategoryShowcaseProps) {
                     title={`Browse ${category.name} products`}
                     className="group flex w-20 flex-col items-center gap-2.5 py-1.5 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:w-24 md:w-28"
                   >
-                    <span className="relative block size-20 overflow-hidden rounded bg-muted ring-1 ring-border transition-all duration-300 group-hover:ring-2 group-hover:ring-primary group-focus-visible:ring-2 group-focus-visible:ring-primary sm:size-24 md:size-28">
+                    <span className="relative block size-20 overflow-hidden rounded-full bg-muted ring-1 ring-border transition-all duration-300 group-hover:ring-2 group-hover:ring-primary group-focus-visible:ring-2 group-focus-visible:ring-primary sm:size-24 md:size-28">
                       {category.image ? (
                         <Image
                           src={category.image}
@@ -116,12 +138,14 @@ export function CategoryShowcase({ categories }: CategoryShowcaseProps) {
             ))}
           </CarouselContent>
 
-          {categories.length > 4 && (
+          {/* Navigation Buttons */}
+          {canScroll && (
             <>
               <CarouselPrevious
                 aria-label="Previous categories"
                 className="left-0 hidden group-hover/carousel:flex"
               />
+
               <CarouselNext
                 aria-label="Next categories"
                 className="right-0 hidden group-hover/carousel:flex"

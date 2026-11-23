@@ -1,8 +1,8 @@
 import Link from "next/link"
 import { ArrowUpRight } from "lucide-react"
 
-import { ProductGrid } from "@/features/categories/components/product-grid"
-import type { StoreProduct } from "@/features/categories/api/product.api"
+import { ProductGrid } from "@/features/product/components/product-grid"
+import type { StoreProduct } from "@/features/product/types/product.types"
 
 export function FeaturedProducts({ products }: { products: StoreProduct[] }) {
   if (products.length === 0) return null

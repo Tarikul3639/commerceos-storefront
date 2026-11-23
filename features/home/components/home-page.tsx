@@ -31,8 +31,8 @@ export async function HomePage() {
       <Banner slides={homeTopBanners} />
       <CategoryShowcase categories={categories} />
       <FeaturedProducts products={featuredProducts.data} />
-      <Banner slides={promotionalBanners} />
       <NewArrivals products={newArrivals.data} />
+      <Banner slides={promotionalBanners} />
     </>
   )
 }
