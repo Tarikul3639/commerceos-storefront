@@ -7,6 +7,8 @@ import { getHomeNewArrivals, getHomeBestSellers } from "../api/home.api"
 import { FeaturedProducts } from "./featured-products"
 import { NewArrivals } from "./new-arrivals"
 import { BestSellers } from "./best-sellers"
+import { RecentlyViewed } from "./recently-viewed"
+import { HomeClosingSection } from "./home-closing-section"
 
 /**
  * Composes the storefront homepage sections in their intended merchandising order.
@@ -37,6 +39,8 @@ export async function HomePage() {
       <FeaturedProducts products={featuredProducts.data} />
       <Banner slides={promotionalBanners} />
       <NewArrivals products={newArrivals.data} />
+      <RecentlyViewed />
+      <HomeClosingSection />
     </>
   )
 }

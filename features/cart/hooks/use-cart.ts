@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { usePathname } from "next/navigation"
 
-import { clientApi } from "@/lib/api/client-api"
+import { baseApi } from "@/lib/api/base-api"
 import { useCartStore } from "@/features/cart/store/cart-store"
 import type { CartItem } from "@/features/cart/types/cart-item"
 
@@ -76,18 +76,18 @@ export function useCart() {
     cartSyncInFlight = true
 
     try {
-      const remoteCart = await clientApi.get<ApiCart>("/cart")
+      const remoteCart = await baseApi.get<ApiCart>("/cart")
       const guestItems = useCartStore
         .getState()
         .items.filter((item) => !item.serverItemId)
 
       for (const item of guestItems) {
-        await clientApi.post("/cart/items", toApiCartItem(item))
+        await baseApi.post("/cart/items", toApiCartItem(item))
       }
 
       const cart =
         guestItems.length > 0
-          ? await clientApi.get<ApiCart>("/cart")
+          ? await baseApi.get<ApiCart>("/cart")
           : remoteCart
 
       setItems(mapApiCart(cart))
@@ -117,7 +117,7 @@ export function useCart() {
       setIsAdding(true)
 
       try {
-        const cart = await clientApi.post<ApiCart>(
+        const cart = await baseApi.post<ApiCart>(
           "/cart/items",
           toApiCartItem(item)
         )
@@ -144,7 +144,7 @@ export function useCart() {
         return
       }
 
-      const cart = await clientApi.delete<ApiCart>(
+      const cart = await baseApi.delete<ApiCart>(
         `/cart/items/${item.serverItemId}`
       )
 
@@ -162,7 +162,7 @@ export function useCart() {
         return
       }
 
-      const cart = await clientApi.patch<ApiCart>(
+      const cart = await baseApi.patch<ApiCart>(
         `/cart/items/${item.serverItemId}`,
         { quantity }
       )

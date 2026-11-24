@@ -1,9 +1,20 @@
-export default function TemporaryPage() {
+import { RecentlyViewedTracker } from "@/features/product/components/recently-viewed/recently-viewed-tracker"
+
+export default async function TemporaryPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
+
   return (
-    <main className="container mx-auto flex min-h-[40vh] items-center justify-center px-4 py-16">
-      <p className="text-sm text-muted-foreground">
-        This page is under development.
-      </p>
-    </main>
+    <>
+      <RecentlyViewedTracker productId={id} />
+      <main className="container mx-auto flex min-h-[40vh] items-center justify-center px-4 py-16">
+        <p className="text-sm text-muted-foreground">
+          This page is under development.
+        </p>
+      </main>
+    </>
   )
 }
