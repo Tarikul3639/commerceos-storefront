@@ -97,12 +97,12 @@ export function StoreHeader() {
                 type="button"
                 variant="ghost"
                 className={cn(
-                  "hidden size-9 shrink-0 text-foreground/80 hover:bg-muted hover:text-primary md:h-11 sm:w-auto sm:flex-col sm:gap-0.5 sm:px-3 sm:text-[11px] sm:font-medium sm:flex"
+                  "hidden size-9 shrink-0 text-foreground/80 hover:bg-muted hover:text-primary sm:flex sm:w-auto sm:flex-col sm:gap-0.5 sm:px-3 sm:text-[11px] sm:font-medium md:h-11"
                 )}
                 aria-label="Account menu"
               >
                 <UserRound className="size-5" />
-               <span className="hidden md:inline">Account</span>
+                <span className="hidden md:inline">Account</span>
               </Button>
 
               <Button

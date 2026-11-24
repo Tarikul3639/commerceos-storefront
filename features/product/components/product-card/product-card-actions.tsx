@@ -52,11 +52,9 @@ export function ProductCardActions({
         variant={
           isHorizontal ? "outline" : isOutOfStock ? "secondary" : "default"
         }
-        className={
-          isHorizontal
-            ? `relative isolate w-full overflow-hidden border-border bg-background text-foreground before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:bg-primary before:transition-transform before:duration-300 before:ease-in-out hover:border-primary hover:bg-transparent hover:text-primary-foreground hover:before:scale-x-100 sm:h-8 sm:w-auto sm:px-3`
-            : "w-full"
-        }
+        className={`relative isolate w-full overflow-hidden border-border bg-background text-foreground before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:bg-primary before:transition-transform before:duration-300 before:ease-in-out hover:border-primary hover:bg-transparent hover:text-primary-foreground hover:before:scale-x-100 ${
+          isHorizontal ? `sm:h-8 sm:w-auto sm:px-3` : "w-full"
+        }`}
         disabled={isAdding || isOutOfStock}
         onClick={() => handleAction()}
       >

@@ -119,7 +119,7 @@ export function SearchTrigger({
         <span className="flex-1 truncate text-left">Search products</span>
         <kbd
           aria-hidden="true"
-          className="h-5 items-center rounded border border-border bg-background px-1.5 text-[11px] font-medium inline-flex"
+          className="inline-flex h-5 items-center rounded border border-border bg-background px-1.5 text-[11px] font-medium"
         >
           ⌘K / Ctrl K
         </kbd>

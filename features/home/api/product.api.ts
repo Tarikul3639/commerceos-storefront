@@ -9,7 +9,10 @@ export async function getHomeFeaturedProducts(): Promise<StoreProductsResponse> 
       { revalidate: 60, timeoutMs: 8_000 }
     )
   } catch (error) {
-    console.error("[Product API] Failed to fetch homepage featured products.", error)
+    console.error(
+      "[Product API] Failed to fetch homepage featured products.",
+      error
+    )
     return { data: [], total: 0, page: 1, limit: 8, totalPages: 0 }
   }
 }

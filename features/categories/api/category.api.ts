@@ -1,5 +1,8 @@
 import { serverApi } from "@/lib/api/server-api"
-import type { StoreCategoriesResponse, StoreCategory } from "@/features/home/types/category.types"
+import type {
+  StoreCategoriesResponse,
+  StoreCategory,
+} from "@/features/home/types/category.types"
 
 export async function getStoreCategories(
   page = 1,

@@ -71,10 +71,10 @@ export const useCartStore = create<CartState>()(
               items: state.items.map((cartItem) =>
                 !cartItem.serverItemId && cartItem.key === key
                   ? {
-                    ...cartItem,
-                    quantity: cartItem.quantity + item.quantity,
-                    stock: item.stock,
-                  }
+                      ...cartItem,
+                      quantity: cartItem.quantity + item.quantity,
+                      stock: item.stock,
+                    }
                   : cartItem
               ),
             }
@@ -122,8 +122,8 @@ export const useCartStore = create<CartState>()(
         set((state) => ({
           items: state.items.map((item) =>
             !item.serverItemId &&
-              item.key === key &&
-              hasAvailableStock(0, quantity, item.stock)
+            item.key === key &&
+            hasAvailableStock(0, quantity, item.stock)
               ? { ...item, quantity }
               : item
           ),

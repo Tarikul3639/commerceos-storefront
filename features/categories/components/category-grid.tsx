@@ -10,8 +10,12 @@ export function CategoryGrid({ categories }: { categories: StoreCategory[] }) {
     return (
       <div className="flex flex-col items-center justify-center border border-dashed py-20 text-center">
         <ImageIcon className="mb-3 size-8 text-muted-foreground/50" />
-        <p className="text-sm font-medium text-foreground">Nothing in the collection yet</p>
-        <p className="mt-1 text-xs text-muted-foreground">Check back soon for new categories.</p>
+        <p className="text-sm font-medium text-foreground">
+          Nothing in the collection yet
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Check back soon for new categories.
+        </p>
       </div>
     )
   }
@@ -34,9 +38,11 @@ export function CategoryGrid({ categories }: { categories: StoreCategory[] }) {
                   alt={category.name}
                   fill
                   priority
-                  sizes={featured
-                    ? "(max-width: 768px) 50vw, (max-width: 1280px) 66vw, 50vw"
-                    : "(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 25vw"}
+                  sizes={
+                    featured
+                      ? "(max-width: 768px) 50vw, (max-width: 1280px) 66vw, 50vw"
+                      : "(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                  }
                   className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                 />
               ) : (
@@ -56,12 +62,18 @@ export function CategoryGrid({ categories }: { categories: StoreCategory[] }) {
                 </span>
               </div>
 
-              <div className={`absolute inset-x-0 bottom-0 p-3 text-left sm:p-5 ${featured ? "sm:p-7" : ""}`}>
-                <h2 className={`line-clamp-2 font-semibold tracking-tight text-white ${featured ? "text-xl sm:text-3xl" : "text-sm sm:text-lg"}`}>
+              <div
+                className={`absolute inset-x-0 bottom-0 p-3 text-left sm:p-5 ${featured ? "sm:p-7" : ""}`}
+              >
+                <h2
+                  className={`line-clamp-2 font-semibold tracking-tight text-white ${featured ? "text-xl sm:text-3xl" : "text-sm sm:text-lg"}`}
+                >
                   {category.name}
                 </h2>
                 {category.description ? (
-                  <p className={`mt-1 line-clamp-2 text-white/75 ${featured ? "max-w-md text-xs sm:text-sm" : "hidden text-xs sm:block"}`}>
+                  <p
+                    className={`mt-1 line-clamp-2 text-white/75 ${featured ? "max-w-md text-xs sm:text-sm" : "hidden text-xs sm:block"}`}
+                  >
                     {category.description}
                   </p>
                 ) : null}

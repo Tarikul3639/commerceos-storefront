@@ -84,7 +84,7 @@ export function AnnouncementMessage({ message }: AnnouncementMessageProps) {
         {shouldAnimate && (
           <span
             aria-hidden="true"
-            className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap pr-16"
+            className="inline-flex shrink-0 items-center gap-2 pr-16 whitespace-nowrap"
           >
             <Megaphone className="size-3.5 shrink-0" />
             {message}

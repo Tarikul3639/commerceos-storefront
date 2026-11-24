@@ -51,7 +51,7 @@ export function CartSheet() {
           <ShoppingBag className="size-5" />
           <span className="hidden md:inline">Cart</span>
           {totalItems > 0 && (
-            <span className="absolute -top-1 -right-1 flex min-w-5 min-h-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] leading-none font-semibold text-primary-foreground">
+            <span className="absolute -top-1 -right-1 flex min-h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] leading-none font-semibold text-primary-foreground">
               {totalItems > 99 ? "99+" : totalItems}
             </span>
           )}
@@ -85,7 +85,7 @@ export function CartSheet() {
               {items.map((item) => (
                 <div
                   key={item.key}
-                  className="flex gap-3 border-b border-border pb-4 px-2 sm:px-4"
+                  className="flex gap-3 border-b border-border px-2 pb-4 sm:px-4"
                 >
                   <div className="relative size-20 shrink-0 bg-muted">
                     {item.imageUrl ? (
@@ -94,7 +94,7 @@ export function CartSheet() {
                         alt={item.name}
                         fill
                         sizes="80px"
-                        className="object-cover rounded"
+                        className="rounded object-cover"
                       />
                     ) : (
                       <div className="flex size-full items-center justify-center">

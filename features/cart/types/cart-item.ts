@@ -5,15 +5,15 @@
  * Guest items intentionally do not have a server ID.
  */
 export interface CartItem {
-    key: string
-    productId: string
-    variantId: string | null
-    quantity: number
-    stock: number
-    name: string
-    price: number
-    imageUrl: string | null
-    serverItemId?: string
+  key: string
+  productId: string
+  variantId: string | null
+  quantity: number
+  stock: number
+  name: string
+  price: number
+  imageUrl: string | null
+  serverItemId?: string
 }
 
 /** Product information required to add an item to a guest cart. */

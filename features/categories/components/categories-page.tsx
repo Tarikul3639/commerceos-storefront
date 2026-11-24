@@ -47,13 +47,13 @@ export async function CategoriesPage({ searchParams }: CategoriesPageProps) {
               </h1>
             </div>
 
-            <div className="flex relative max-w-sm md:justify-self-end">
+            <div className="relative flex max-w-sm md:justify-self-end">
               <p className="text-xs leading-5 text-muted-foreground sm:text-base sm:leading-6">
                 Every collection has its own character. Take a look around and
                 discover something that feels like you.
               </p>
 
-              <ArrowDownRight className="ml-auto self-end size-3.5 shrink-0 text-primary sm:size-4" />
+              <ArrowDownRight className="ml-auto size-3.5 shrink-0 self-end text-primary sm:size-4" />
             </div>
           </div>
         </header>
