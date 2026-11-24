@@ -129,7 +129,7 @@ export function Footer() {
   }
 
   return (
-    <footer className="border-t border-border bg-muted/30">
+    <footer className="mt-8 sm:mt-10 border-t border-border bg-muted/30">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid gap-8 py-10 sm:py-12 md:grid-cols-[minmax(0,1.4fr)_minmax(15rem,0.6fr)] md:items-end md:gap-12">
           <div className="max-w-xl">

@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation"
 import { baseApi } from "@/lib/api/base-api"
 import { useCartStore } from "@/features/cart/store/cart-store"
 import type { CartItem } from "@/features/cart/types/cart-item"
+import { createCartItemKey } from "@/features/cart/utils/cart-item-key"
 
 let cartSyncInFlight = false
 
@@ -86,9 +87,7 @@ export function useCart() {
       }
 
       const cart =
-        guestItems.length > 0
-          ? await baseApi.get<ApiCart>("/cart")
-          : remoteCart
+        guestItems.length > 0 ? await baseApi.get<ApiCart>("/cart") : remoteCart
 
       setItems(mapApiCart(cart))
     } catch {
@@ -113,23 +112,39 @@ export function useCart() {
   }, [pathname, syncWithAccount])
 
   const addItem = useCallback(
-    async (item: AddCartItem) => {
+    async (item: AddCartItem): Promise<number> => {
       setIsAdding(true)
 
       try {
-        const cart = await baseApi.post<ApiCart>(
-          "/cart/items",
-          toApiCartItem(item)
-        )
+        // Adding to an existing line should consume only the remaining stock,
+        // rather than rejecting the entire request when it exceeds the limit.
+        const itemKey = createCartItemKey(item.productId, item.variantId)
+        const existingQuantity = useCartStore
+          .getState()
+          .items.filter((cartItem) => cartItem.key === itemKey)
+          .reduce((total, cartItem) => total + cartItem.quantity, 0)
+        const remainingStock = Math.max(0, item.stock - existingQuantity)
+        const acceptedQuantity = Math.min(item.quantity, remainingStock)
 
-        setItems(mapApiCart(cart))
-      } catch (error) {
-        if (isUnauthorizedError(error)) {
-          addGuestItem(item)
-          return
+        if (acceptedQuantity < 1) {
+          throw new Error("Maximum available stock is already in your cart")
         }
 
-        throw error
+        const acceptedItem = { ...item, quantity: acceptedQuantity }
+
+        try {
+          const cart = await baseApi.post<ApiCart>(
+            "/cart/items",
+            toApiCartItem(acceptedItem)
+          )
+
+          setItems(mapApiCart(cart))
+        } catch (error) {
+          if (!isUnauthorizedError(error)) throw error
+          addGuestItem(acceptedItem)
+        }
+
+        return acceptedQuantity
       } finally {
         setIsAdding(false)
       }

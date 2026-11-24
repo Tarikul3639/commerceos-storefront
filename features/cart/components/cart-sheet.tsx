@@ -131,6 +131,7 @@ export function CartSheet() {
                         variant="outline"
                         size="icon-xs"
                         aria-label="Increase quantity"
+                        disabled={item.quantity >= item.stock}
                         onClick={() =>
                           void handleQuantity(item, item.quantity + 1)
                         }

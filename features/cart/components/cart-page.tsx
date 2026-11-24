@@ -89,6 +89,7 @@ export function CartPage() {
                       variant="outline"
                       size="icon-xs"
                       aria-label="Increase quantity"
+                      disabled={item.quantity >= item.stock}
                       onClick={() =>
                         void update(() =>
                           updateQuantity(item, item.quantity + 1)

@@ -22,6 +22,7 @@ export async function HomePage() {
     bestSellers,
     promotionalBanners,
     newArrivals,
+    homBottomBanners,
   ] = await Promise.all([
     getBannerSlides("HOME_TOP"),
     getHomeCategories(),
@@ -29,7 +30,9 @@ export async function HomePage() {
     getHomeBestSellers(),
     getBannerSlides("HOME_MIDDLE"),
     getHomeNewArrivals(),
+    getBannerSlides("HOME_BOTTOM"),
   ])
+
 
   return (
     <>
@@ -40,6 +43,7 @@ export async function HomePage() {
       <Banner slides={promotionalBanners} />
       <NewArrivals products={newArrivals.data} />
       <RecentlyViewed />
+      <Banner slides={homBottomBanners} />
       <HomeClosingSection />
     </>
   )
