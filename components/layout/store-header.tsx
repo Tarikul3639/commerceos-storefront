@@ -5,8 +5,8 @@ import Image from "next/image"
 import Link from "next/link"
 import { UserRound } from "lucide-react"
 
-import { DesktopNavigation } from "@/components/layout/desktop-navigation"
-import { MobileNavigationDrawer } from "@/components/layout/mobile-navigation-drawer"
+import { DesktopNavigation } from "@/features/navigation/components/desktop-navigation"
+import { MobileNavigationDrawer } from "@/features/navigation/components/mobile-navigation-drawer"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { CartSheet } from "@/features/cart/components/cart-sheet"
@@ -14,16 +14,16 @@ import { WishlistSheet } from "@/features/wishlist/components/wishlist-sheet"
 import { SearchDialog } from "@/features/search/components/search-dialog"
 import { SearchTrigger } from "@/features/search/components/search-trigger"
 import { storeConfig } from "@/config/store.config"
+import type { NavigationCategory } from "@/features/navigation/api/navigation.api"
 import { cn } from "@/lib/utils"
 
-/**
- * Renders the complete storefront header, including the sticky masthead and desktop navigation.
- * Search state and keyboard shortcuts stay here so every search trigger shares one dialog.
- */
-export function StoreHeader() {
+export function StoreHeader({
+  navigationCategories,
+}: {
+  navigationCategories: NavigationCategory[]
+}) {
   const [searchOpen, setSearchOpen] = useState(false)
 
-  // Support the conventional command shortcut and slash-to-search without hijacking text entry.
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null
@@ -57,6 +57,7 @@ export function StoreHeader() {
           <div className="grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-3 md:h-20 md:grid-cols-[auto_minmax(0,1fr)_auto] md:gap-8">
             <div className="flex items-center md:hidden">
               <MobileNavigationDrawer
+                categories={navigationCategories}
                 onOpenSearch={() => setSearchOpen(true)}
               />
             </div>
@@ -103,10 +104,7 @@ export function StoreHeader() {
               </Button>
 
               <WishlistSheet />
-
               <ThemeToggle />
-
-              {/* CartSheet owns the cart drawer interaction and contents. */}
               <CartSheet />
             </div>
           </div>
@@ -114,7 +112,7 @@ export function StoreHeader() {
       </header>
 
       <div className="mx-auto w-full bg-card">
-        <DesktopNavigation />
+        <DesktopNavigation categories={navigationCategories} />
       </div>
       <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
     </>

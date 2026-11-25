@@ -1,9 +1,17 @@
-export default function TemporaryPage() {
-  return (
-    <main className="container mx-auto flex min-h-[40vh] items-center justify-center px-4 py-16">
-      <p className="text-sm text-muted-foreground">
-        This page is under development.
-      </p>
-    </main>
-  )
+import type { Metadata } from "next"
+
+import { BrandsPage } from "@/features/brands/components/brands-page"
+
+export const metadata: Metadata = {
+  title: "Brands",
+  description:
+    "Explore the brands behind our collection and discover your favorites.",
+}
+
+type BrandsRouteProps = {
+  searchParams: Promise<{ page?: string; search?: string }>
+}
+
+export default function BrandsRoute({ searchParams }: BrandsRouteProps) {
+  return <BrandsPage searchParams={searchParams} />
 }

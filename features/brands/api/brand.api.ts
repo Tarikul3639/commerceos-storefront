@@ -4,9 +4,11 @@ export type StoreBrand = {
   id: string
   name: string
   slug: string
+  description: string | null
+  image: string | null
 }
 
-type StoreBrandsResponse = {
+export type StoreBrandsResponse = {
   data: StoreBrand[]
   meta: {
     total: number
@@ -18,17 +20,43 @@ type StoreBrandsResponse = {
   }
 }
 
-/** Fetch active public brands for the product filter drawer. */
-export async function getStoreBrands(): Promise<StoreBrand[]> {
+/** Fetch active public brands for the storefront. */
+export async function getStoreBrandsPage(
+  page = 1,
+  limit = 24,
+  search?: string
+): Promise<StoreBrandsResponse> {
+  const params = new URLSearchParams({
+    isActive: "true",
+    page: String(page),
+    limit: String(limit),
+  })
+
+  if (search) params.set("search", search)
+
   try {
-    const response = await serverApi.get<StoreBrandsResponse>(
-      "/brands?isActive=true&page=1&limit=100",
+    return await serverApi.get<StoreBrandsResponse>(
+      `/brands?${params.toString()}`,
       { revalidate: 60, timeoutMs: 8_000 }
     )
-
-    return response.data
   } catch (error) {
     console.error("[Brand API] Failed to fetch storefront brands.", error)
-    return []
+    return {
+      data: [],
+      meta: {
+        total: 0,
+        page,
+        limit,
+        totalPages: 0,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
+    }
   }
+}
+
+/** Fetch active brands used by product filter controls. */
+export async function getStoreBrands(): Promise<StoreBrand[]> {
+  const response = await getStoreBrandsPage(1, 100)
+  return response.data
 }

@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import { Info, Store, Tag, type LucideIcon } from "lucide-react"
 import { usePathname } from "next/navigation"
 
 import { Badge } from "@/components/ui/badge"
@@ -15,72 +14,23 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import { Separator } from "@/components/ui/separator"
+import type { NavigationCategory } from "@/features/navigation/api/navigation.api"
 
-type NavigationItem = {
-  href: string
-  label: string
-  icon: LucideIcon
-}
-
-/** Main desktop links; active state follows the current storefront route. */
-const navigationItems: NavigationItem[] = [
-  { href: "/products", label: "Shop all", icon: Store },
-  { href: "/brands", label: "Brands", icon: Tag },
-  { href: "/about", label: "Our story", icon: Info },
+const navigationItems = [
+  { href: "/products", label: "Shop all" },
+  { href: "/brands", label: "Brands" },
+  { href: "/about", label: "Our story" },
 ]
 
-/** Temporary category shortcuts until category navigation is loaded from the API. */
-const featuredCategories = [
-  {
-    href: "/categories/new-arrivals",
-    label: "New arrivals",
-    description: "Just landed this week",
-    badge: "New",
-  },
-  {
-    href: "/categories/best-sellers",
-    label: "Best sellers",
-    description: "What everyone is buying",
-  },
-  {
-    href: "/categories/home",
-    label: "Home",
-    description: "Decor, kitchen and storage",
-  },
-  {
-    href: "/categories/beauty",
-    label: "Beauty",
-    description: "Skin, hair and body",
-  },
-  {
-    href: "/categories/fashion",
-    label: "Fashion",
-    description: "Clothing and accessories",
-  },
-  {
-    href: "/categories/electronics",
-    label: "Electronics",
-    description: "Gadgets and accessories",
-  },
-  {
-    href: "/categories/sale",
-    label: "Sale",
-    description: "Limited-time discounts",
-    badge: "Sale",
-  },
-  {
-    href: "/categories/gifts",
-    label: "Gifts",
-    description: "Ideas for every budget",
-  },
-]
-
-/**
- * Renders only the desktop category menu and primary navigation links.
- * This component is intentionally independent from the main masthead controls.
- */
-export function DesktopNavigation() {
+export function DesktopNavigation({
+  categories,
+}: {
+  categories: NavigationCategory[]
+}) {
   const pathname = usePathname()
+  const featuredCategories = categories.slice(0, 5)
+  const categoriesHref = "/categories"
+
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(`${href}/`)
 
@@ -94,20 +44,25 @@ export function DesktopNavigation() {
           <NavigationMenuItem>
             <NavigationMenuTrigger>Categories</NavigationMenuTrigger>
             <NavigationMenuContent>
-              <ul className="grid w-148 grid-cols-2 gap-1 p-2">
+              <ul className="grid w-148 grid-cols-1 gap-1 p-2">
                 {featuredCategories.map((category) => (
-                  <li key={category.href}>
+                  <li key={category.id}>
                     <NavigationMenuLink asChild>
-                      <Link href={category.href}>
+                      <Link href={`/categories/${category.slug}`}>
                         <span className="flex items-center gap-2 text-sm font-medium">
-                          {category.label}
-                          {category.badge && (
-                            <Badge variant="secondary">{category.badge}</Badge>
+                          {category.name}
+                          {category.slug === "new-arrivals" && (
+                            <Badge variant="secondary">New</Badge>
+                          )}
+                          {category.slug === "sale" && (
+                            <Badge variant="secondary">Sale</Badge>
                           )}
                         </span>
-                        <span className="text-xs text-muted-foreground">
-                          {category.description}
-                        </span>
+                        {category.description && (
+                          <span className="text-xs text-muted-foreground">
+                            {category.description}
+                          </span>
+                        )}
                       </Link>
                     </NavigationMenuLink>
                   </li>
@@ -116,7 +71,7 @@ export function DesktopNavigation() {
               <Separator />
               <div className="p-2">
                 <NavigationMenuLink asChild>
-                  <Link href="/categories" className="text-sm font-medium">
+                  <Link href={categoriesHref} className="text-sm font-medium">
                     See all categories
                   </Link>
                 </NavigationMenuLink>
@@ -126,6 +81,7 @@ export function DesktopNavigation() {
 
           {navigationItems.map((item) => {
             const active = isActive(item.href)
+
             return (
               <NavigationMenuItem key={item.href}>
                 <NavigationMenuLink

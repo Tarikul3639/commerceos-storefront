@@ -88,7 +88,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
             value={query}
             onValueChange={setQuery}
             placeholder="Search products, brands, categories or SKU..."
-            className="h-12 pr-5 text-sm sm:text-base [&+div[data-slot=input-group-addon]]:opacity-0"
+            className="pr-5 text-sm sm:text-base [&+div[data-slot=input-group-addon]]:opacity-0"
           />
 
           <div className="absolute top-1/2 left-5 -translate-y-1/2">
