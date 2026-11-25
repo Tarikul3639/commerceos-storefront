@@ -9,6 +9,7 @@ import { NewArrivals } from "./new-arrivals"
 import { BestSellers } from "./best-sellers"
 import { RecentlyViewed } from "./recently-viewed"
 import { HomeClosingSection } from "./home-closing-section"
+import { CommonQuestions } from "@/features/support/components/common-questions"
 
 /**
  * Composes the storefront homepage sections in their intended merchandising order.
@@ -44,6 +45,7 @@ export async function HomePage() {
       <RecentlyViewed />
       <Banner slides={homBottomBanners} />
       <HomeClosingSection />
+      <CommonQuestions />
     </>
   )
 }

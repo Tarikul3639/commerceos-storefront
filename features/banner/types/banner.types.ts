@@ -6,6 +6,7 @@ export type BannerPlacement =
   | "CATEGORY_MIDDLE"
   | "PRODUCT_TOP"
   | "PRODUCT_MIDDLE"
+  | "BRAND_TOP"
   | "SHOP_TOP"
   | "SHOP_MIDDLE"
   | "SIDEBAR"

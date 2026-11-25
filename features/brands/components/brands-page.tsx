@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { BrandGrid } from "@/features/brands/components/brand-grid"
 import { getStoreBrandsPage } from "@/features/brands/api/brand.api"
+import { Banner } from "@/features/banner/components/banner"
+import { getBannerSlides } from "@/features/banner/api/banner.api"
 
 type BrandsPageProps = {
   searchParams: Promise<{ page?: string; search?: string }>
@@ -15,7 +17,10 @@ export async function BrandsPage({ searchParams }: BrandsPageProps) {
   const params = await searchParams
   const page = Math.max(1, Number(params.page) || 1)
   const search = params.search?.trim().slice(0, 100) ?? ""
-  const brands = await getStoreBrandsPage(page, 24, search || undefined)
+  const [brands, brandBanners] = await Promise.all([
+    getStoreBrandsPage(page, 24, search || undefined),
+    getBannerSlides("BRAND_TOP"),
+  ])
 
   const pageHref = (nextPage: number) => {
     const query = new URLSearchParams()
@@ -25,7 +30,9 @@ export async function BrandsPage({ searchParams }: BrandsPageProps) {
   }
 
   return (
-    <main className="mx-auto max-w-7xl px-2 py-8 pb-12 sm:px-4 lg:px-6">
+    <>
+      <Banner slides={brandBanners} />
+      <main className="mx-auto max-w-7xl px-2 py-8 pb-12 sm:px-4 lg:px-6">
       <header className="relative mb-7 overflow-hidden bg-muted/50 px-4 py-6 sm:mb-9 sm:px-8 sm:py-9 lg:px-10">
         <div className="pointer-events-none absolute -top-16 -right-10 size-48 border border-foreground/5 sm:-top-20 sm:-right-12 sm:size-64 lg:size-80" />
         <div className="pointer-events-none absolute -top-8 -right-1 size-36 border border-foreground/5 sm:-top-10 sm:-right-2 sm:size-48 lg:size-64" />
@@ -130,6 +137,7 @@ export async function BrandsPage({ searchParams }: BrandsPageProps) {
           )}
         </nav>
       ) : null}
-    </main>
+      </main>
+    </>
   )
 }

@@ -42,6 +42,7 @@ const footerGroups: { title: string; links: FooterLink[] }[] = [
     links: [
       { href: "/privacy-policy", label: "Privacy policy" },
       { href: "/terms", label: "Terms & conditions" },
+      { href: "/faq", label: "FAQs" },
     ],
   },
 ]
