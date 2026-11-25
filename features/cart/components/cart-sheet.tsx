@@ -112,6 +112,11 @@ export function CartSheet() {
                     <p className="mt-1 text-sm font-semibold">
                       ৳{item.price.toLocaleString("en-BD")}
                     </p>
+                    {item.quantity > item.stock && (
+                      <p className="mt-1 text-xs font-medium text-destructive">
+                        Only {item.stock} item(s) currently available.
+                      </p>
+                    )}
                     <div className="mt-2 flex items-center gap-2">
                       <Button
                         variant="outline"

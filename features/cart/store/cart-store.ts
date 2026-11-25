@@ -16,6 +16,7 @@ interface CartState {
   setHydrated: (hydrated: boolean) => void
   addGuestItem: (item: GuestCartItem) => void
   setItems: (items: CartItem[]) => void
+  updateStock: (stockItems: Array<{ productId: string; variantId: string | null; stock: number }>) => void
   clear: () => void
   remove: (key: string) => void
   setQuantity: (key: string, quantity: number) => void
@@ -71,10 +72,10 @@ export const useCartStore = create<CartState>()(
               items: state.items.map((cartItem) =>
                 !cartItem.serverItemId && cartItem.key === key
                   ? {
-                      ...cartItem,
-                      quantity: cartItem.quantity + item.quantity,
-                      stock: item.stock,
-                    }
+                    ...cartItem,
+                    quantity: cartItem.quantity + item.quantity,
+                    stock: item.stock,
+                  }
                   : cartItem
               ),
             }
@@ -103,6 +104,20 @@ export const useCartStore = create<CartState>()(
       // Replace the current cart view, for example with items returned by the backend.
       setItems: (items) => set({ items }),
 
+      // Refresh stock values without changing cart quantities or product details.
+      updateStock: (stockItems) => {
+        const stockByKey = new Map(
+          stockItems.map((item) => [createCartItemKey(item.productId, item.variantId), item.stock])
+        )
+
+        set((state) => ({
+          items: state.items.map((item) => {
+            const stock = stockByKey.get(item.key)
+            return stock === undefined ? item : { ...item, stock }
+          }),
+        }))
+      },
+
       // Clear the current cart items. Persist middleware will persist the empty guest cart.
       clear: () => set({ items: [] }),
 
@@ -122,8 +137,9 @@ export const useCartStore = create<CartState>()(
         set((state) => ({
           items: state.items.map((item) =>
             !item.serverItemId &&
-            item.key === key &&
-            hasAvailableStock(0, quantity, item.stock)
+              item.key === key &&
+              (quantity <= item.quantity ||
+                hasAvailableStock(0, quantity, item.stock))
               ? { ...item, quantity }
               : item
           ),

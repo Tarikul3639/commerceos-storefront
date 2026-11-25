@@ -4,12 +4,20 @@ import { useMemo, useState } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
-import { ArrowRight, Minus, Plus, ShoppingCart } from "lucide-react"
+import {
+  ArrowRight,
+  CircleAlert,
+  Minus,
+  Plus,
+  ShoppingCart,
+} from "lucide-react"
 import { toast } from "sonner"
 
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -19,6 +27,8 @@ import {
 import { Label } from "@/components/ui/label"
 import { useCart } from "@/features/cart/hooks/use-cart"
 import { baseApi } from "@/lib/api/base-api"
+import { getApiErrorMessage } from "@/lib/api/api-error"
+import { cn } from "@/lib/utils"
 
 interface ProductOptionValue {
   id: string
@@ -60,6 +70,9 @@ interface ProductDetails {
   variants: ProductVariant[]
 }
 
+/** optionId -> selected valueId */
+type Selection = Record<string, string>
+
 interface ProductVariantDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -73,6 +86,15 @@ interface ProductVariantDialogProps {
   buyNow?: boolean
 }
 
+/** True when the variant contains every option value picked so far. */
+function matchesSelection(variant: ProductVariant, selection: Selection) {
+  return Object.entries(selection).every(([optionId, valueId]) =>
+    variant.options.some(
+      (option) => option.optionId === optionId && option.id === valueId
+    )
+  )
+}
+
 export function ProductVariantDialog({
   open,
   onOpenChange,
@@ -82,11 +104,12 @@ export function ProductVariantDialog({
   buyNow = false,
 }: ProductVariantDialogProps) {
   const router = useRouter()
-  const { addItem, isAdding } = useCart()
-  const [selectedValues, setSelectedValues] = useState<Record<string, string>>(
-    {}
-  )
+  const { addItem, isAdding, items: cartItems } = useCart()
+  // null until the user picks something; until then the default variant is used.
+  const [userSelection, setUserSelection] = useState<Selection | null>(null)
   const [quantity, setQuantity] = useState(1)
+  // Only turned on by clicking "Add to cart" or "+" at the stock limit.
+  const [showStockAlert, setShowStockAlert] = useState(false)
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["store-product-details", product.id],
@@ -97,112 +120,73 @@ export function ProductVariantDialog({
     refetchOnMount: true,
   })
 
+  const hasOptions = Boolean(data?.options.length)
+
+  // Pre-select the first available variant so an in-stock option is chosen initially.
+  const defaultSelection = useMemo<Selection>(() => {
+    const variant = data?.variants.find(
+      (item) => item.isAvailable && item.stock > 0
+    )
+
+    return Object.fromEntries(
+      variant?.options.map((option) => [option.optionId, option.id]) ?? []
+    )
+  }, [data])
+  const selection = userSelection ?? defaultSelection
+
   const selectedVariant = useMemo(() => {
     if (!data?.options.length) return null
-    if (Object.keys(selectedValues).length !== data.options.length) return null
+    if (Object.keys(selection).length !== data.options.length) return null
 
     return (
-      data.variants.find((variant) =>
-        data.options.every((option) =>
-          variant.options.some(
-            (variantOption) =>
-              variantOption.optionId === option.id &&
-              variantOption.id === selectedValues[option.id]
-          )
-        )
-      ) ?? null
+      data.variants.find((variant) => matchesSelection(variant, selection)) ??
+      null
     )
-  }, [data, selectedValues])
+  }, [data, selection])
 
-  const hasOptions = Boolean(data?.options.length)
   const canAdd = !hasOptions || Boolean(selectedVariant)
+  const isVariantOutOfStock = Boolean(
+    selectedVariant && !selectedVariant.isAvailable
+  )
+
   const availableStock = hasOptions
     ? (selectedVariant?.stock ?? 0)
     : product.stock
+  const quantityInCart = cartItems
+    .filter(
+      (item) =>
+        item.productId === product.id &&
+        item.variantId === (selectedVariant?.id ?? null)
+    )
+    .reduce((total, item) => total + item.quantity, 0)
+  const remainingStock = Math.max(0, availableStock - quantityInCart)
+
+  // Keeps the shown quantity valid when the user switches to a variant with less stock.
+  const safeQuantity = Math.min(
+    Math.max(quantity, 1),
+    Math.max(remainingStock, 1)
+  )
+
   const currentPrice = data ? Number(data.sellingPrice) : sellingPrice
   const currentImage = data?.images[0]?.imageUrl ?? image ?? null
-  const variantUnavailable =
-    hasOptions && canAdd && !selectedVariant?.isAvailable
 
-  const hasAvailableVariant = (optionId: string, valueId: string) => {
-    const nextSelection = { ...selectedValues, [optionId]: valueId }
-
-    return Boolean(
-      data?.variants.some(
-        (variant) =>
-          variant.isAvailable &&
-          variant.stock > 0 &&
-          data.options.every((option) => {
-            const selectedValue = nextSelection[option.id]
-            return (
-              !selectedValue ||
-              variant.options.some(
-                (variantOption) =>
-                  variantOption.optionId === option.id &&
-                  variantOption.id === selectedValue
-              )
-            )
-          })
-      )
-    )
-  }
-
-  const handleAddToCart = async () => {
-    if (!canAdd || !data || availableStock < 1 || quantity > availableStock)
-      return
-
-    try {
-      const addedQuantity = await addItem({
-        productId: product.id,
-        variantId: selectedVariant?.id ?? null,
-        quantity,
-        stock: availableStock,
-        name: product.name,
-        price: currentPrice,
-        imageUrl: currentImage,
-      })
-
-      onOpenChange(false)
-      if (buyNow) router.push("/checkout")
-      else if (addedQuantity < quantity) {
-        toast.success(`Added ${addedQuantity} item(s). Maximum available stock reached.`)
-      } else {
-        toast.success("Added to cart")
-      }
-    } catch (error) {
-      const responseMessage =
-        typeof error === "object" && error !== null && "data" in error
-          ? (error as { data?: { message?: unknown } }).data?.message
-          : undefined
-      const serverMessage = Array.isArray(responseMessage)
-        ? responseMessage.join(" ")
-        : typeof responseMessage === "string"
-          ? responseMessage
-          : ""
-
-      const stockMatch = serverMessage.match(
-        /Only (\d+) item\(s\) are currently available/i
-      )
-
-      if (stockMatch) {
-        const available = Number(stockMatch[1])
-        toast.error(
-          available > 0
-            ? `দুঃখিত, বর্তমানে এই পণ্যটি মাত্র ${available}টি স্টকে আছে। পরিমাণ কমিয়ে আবার চেষ্টা করুন।`
-            : "দুঃখিত, এই পণ্যটি বর্তমানে স্টকে নেই।"
-        )
-      } else {
-        toast.error(
-          buyNow
-            ? "চেকআউটে যাওয়া যায়নি। আবার চেষ্টা করুন।"
-            : "কার্টে পণ্যটি যোগ করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।"
-        )
-      }
-    }
-  }
+  const stockMessage =
+    remainingStock < 1
+      ? quantityInCart > 0
+        ? "You've already added the maximum available stock of this variant to your cart."
+        : "This product is currently out of stock."
+      : quantityInCart > 0
+        ? `You already have ${quantityInCart} in your cart. Only ${remainingStock} more can be added.`
+        : `Only ${availableStock} in stock.`
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        setShowStockAlert(false)
+        onOpenChange(next)
+      }}
+    >
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
         <DialogHeader className="pr-7">
           <DialogTitle className="text-base">
@@ -246,11 +230,23 @@ export function ProductVariantDialog({
               </div>
             </div>
 
-            {data.options.length > 0 ? (
+            {showStockAlert ? (
+              <Alert variant="destructive" role="alert">
+                <CircleAlert />
+                <AlertDescription>{stockMessage}</AlertDescription>
+              </Alert>
+            ) : quantityInCart > 0 && remainingStock >= 1 ? (
+              <p className="text-xs text-muted-foreground">
+                You already have {quantityInCart} in your cart. You can add{" "}
+                {remainingStock} more.
+              </p>
+            ) : null}
+
+            {hasOptions ? (
               <div className="space-y-4">
                 {data.options.map((option) => {
                   const isColor = option.type === "COLOR"
-                  const selectedValue = selectedValues[option.id]
+                  const selectedValueId = selection[option.id]
 
                   return (
                     <div key={option.id} className="space-y-2">
@@ -258,37 +254,37 @@ export function ProductVariantDialog({
                         {option.name}:{" "}
                         <span className="font-normal text-primary">
                           {option.values.find(
-                            (value) => value.id === selectedValue
+                            (value) => value.id === selectedValueId
                           )?.label ?? `Select ${option.name.toLowerCase()}`}
                         </span>
                       </Label>
 
                       <div className="flex flex-wrap gap-2">
                         {option.values.map((value) => {
-                          const active = selectedValue === value.id
-                          const available = hasAvailableVariant(
-                            option.id,
-                            value.id
+                          const active = selectedValueId === value.id
+                          const available = data.variants.some(
+                            (variant) =>
+                              variant.isAvailable &&
+                              variant.stock > 0 &&
+                              matchesSelection(variant, {
+                                ...selection,
+                                [option.id]: value.id,
+                              })
                           )
 
                           return (
                             <Button
                               key={value.id}
                               type="button"
-                              variant={
-                                isColor
-                                  ? "outline"
-                                  : active
-                                    ? "default"
-                                    : "outline"
-                              }
+                              variant={!isColor && active ? "default" : "outline"}
                               size={isColor ? "icon" : "sm"}
-                              onClick={() =>
-                                setSelectedValues((current) => ({
-                                  ...current,
+                              onClick={() => {
+                                setUserSelection({
+                                  ...selection,
                                   [option.id]: value.id,
-                                }))
-                              }
+                                })
+                                setShowStockAlert(false)
+                              }}
                               aria-pressed={active}
                               aria-label={
                                 isColor
@@ -296,16 +292,21 @@ export function ProductVariantDialog({
                                   : undefined
                               }
                               title={value.label}
-                              className={
+                              className={cn(
+                                "relative",
                                 isColor
-                                  ? `relative hover:border-primary! ${active ? "border-2! p-0.5 border-primary!" : ""} ${!available ? "opacity-50" : ""}`
-                                  : `relative min-w-8 overflow-hidden ${!available ? "opacity-50" : ""}`
-                              }
+                                  ? [
+                                      "hover:border-primary!",
+                                      active && "border-2! border-primary! p-0.5",
+                                    ]
+                                  : "min-w-8 overflow-hidden",
+                                !available && "opacity-50"
+                              )}
                             >
                               {isColor ? (
                                 <span
                                   aria-hidden="true"
-                                  className="block w-full h-full border border-border/50"
+                                  className="block h-full w-full border border-border/50"
                                   style={{
                                     backgroundColor:
                                       value.colorCode ?? "transparent",
@@ -327,13 +328,14 @@ export function ProductVariantDialog({
                     </div>
                   )
                 })}
-                {Object.keys(selectedValues).length === data.options.length &&
+
+                {Object.keys(selection).length === data.options.length &&
                   !selectedVariant && (
                     <p className="text-xs text-destructive">
                       This combination is not available.
                     </p>
                   )}
-                {selectedVariant && !selectedVariant.isAvailable && (
+                {isVariantOutOfStock && (
                   <p className="text-xs text-destructive">
                     This variant is out of stock.
                   </p>
@@ -352,34 +354,44 @@ export function ProductVariantDialog({
               </p>
             )}
 
-            <div className="flex items-center justify-between">
-              <Label htmlFor={`quantity-${product.id}`}>Quantity</Label>
+            <div
+              role="group"
+              aria-labelledby={`quantity-label-${product.id}`}
+              className="flex items-center justify-between"
+            >
+              <Label id={`quantity-label-${product.id}`}>Quantity</Label>
               <div className="flex items-center border border-border">
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon-sm"
                   aria-label="Decrease quantity"
-                  disabled={quantity <= 1}
-                  onClick={() => setQuantity((value) => Math.max(1, value - 1))}
+                  disabled={safeQuantity <= 1}
+                  onClick={() => {
+                    setQuantity(safeQuantity - 1)
+                    setShowStockAlert(false)
+                  }}
                 >
                   <Minus className="size-3.5" />
                 </Button>
                 <span
-                  id={`quantity-${product.id}`}
+                  aria-live="polite"
                   className="min-w-8 text-center text-sm tabular-nums"
                 >
-                  {quantity}
+                  {safeQuantity}
                 </span>
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon-sm"
                   aria-label="Increase quantity"
-                  disabled={quantity >= availableStock}
-                  onClick={() =>
-                    setQuantity((value) => Math.min(availableStock, value + 1))
-                  }
+                  onClick={() => {
+                    if (safeQuantity >= remainingStock) {
+                      setShowStockAlert(true)
+                      return
+                    }
+                    setQuantity(safeQuantity + 1)
+                  }}
                 >
                   <Plus className="size-3.5" />
                 </Button>
@@ -389,26 +401,50 @@ export function ProductVariantDialog({
         )}
 
         <DialogFooter>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-          >
-            Cancel
-          </Button>
+          <DialogClose asChild>
+            <Button type="button" variant="outline">
+              Cancel
+            </Button>
+          </DialogClose>
           <Button
             type="button"
             disabled={
-              isLoading ||
-              isError ||
-              !data ||
-              !canAdd ||
-              variantUnavailable ||
-              availableStock < 1 ||
-              quantity > availableStock ||
-              isAdding
+              !data || isError || !canAdd || isVariantOutOfStock || isAdding
             }
-            onClick={() => void handleAddToCart()}
+            onClick={async () => {
+              if (remainingStock < 1) {
+                setShowStockAlert(true)
+                return
+              }
+
+              setShowStockAlert(false)
+
+              try {
+                const addedQuantity = await addItem({
+                  productId: product.id,
+                  variantId: selectedVariant?.id ?? null,
+                  quantity: safeQuantity,
+                  stock: availableStock,
+                  name: product.name,
+                  price: currentPrice,
+                  imageUrl: currentImage,
+                })
+
+                onOpenChange(false)
+
+                if (buyNow) router.push("/checkout")
+                else
+                  toast.success(
+                    addedQuantity < safeQuantity
+                      ? `Added ${addedQuantity} item(s). Maximum available stock reached.`
+                      : "Added to cart"
+                  )
+              } catch (error) {
+                toast.error(
+                  getApiErrorMessage(error, "Failed to add product to cart.")
+                )
+              }
+            }}
           >
             <ShoppingCart className="size-4" />
             {isAdding
