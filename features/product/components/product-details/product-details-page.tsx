@@ -1,159 +1,85 @@
 "use client"
 
-import { useMemo, useState } from "react"
-import Image from "next/image"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useQuery } from "@tanstack/react-query"
-import { ArrowLeft, Minus, Plus, ShoppingCart } from "lucide-react"
+import { Minus, Plus, ShoppingCart, Heart, Share2 } from "lucide-react"
 import { toast } from "sonner"
-
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { useCart } from "@/features/cart/hooks/use-cart"
-import type {
-  StoreProductDetailResponse,
-  StoreProductVariant,
-} from "@/features/product/types"
-import { baseApi } from "@/lib/api/base-api"
-import { getApiErrorMessage } from "@/lib/api/api-error"
-import { cn } from "@/lib/utils"
-
-type Selection = Record<string, string>
+import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
+import { ProductImageGallery } from "./product-image-gallery"
+import { ProductOptions } from "./product-options"
+import { ProductBenefits } from "./product-benefits"
+import { ProductDescription } from "./product-description"
+import { useProductDetails } from "@/features/product/hooks/use-product-details"
+import { useProductPurchase } from "@/features/product/hooks/use-product-purchase"
+import { useProductWishlist } from "@/features/wishlist/hooks/use-product-wishlist"
 
 interface ProductDetailsPageProps {
   productId: string
-  initialVariantId: string | null
-}
-
-function matchesSelection(variant: StoreProductVariant, selection: Selection) {
-  return Object.entries(selection).every(([optionId, valueId]) =>
-    variant.options.some(
-      (option) => option.optionId === optionId && option.id === valueId
-    )
-  )
+  initialSku: string | null
 }
 
 export function ProductDetailsPage({
   productId,
-  initialVariantId,
+  initialSku,
 }: ProductDetailsPageProps) {
-  const router = useRouter()
-  const { addItem, isAdding, items: cartItems } = useCart()
-  const [userSelection, setUserSelection] = useState<Selection | null>(null)
-  const [quantity, setQuantity] = useState(1)
+  const {
+    data,
+    isLoading,
+    isError,
+    selection,
+    hasOptions,
+    selectedVariant,
+    availableStock,
+    isOutOfStock,
+    sizeGuide,
+    totalStock,
+    handleProductSelection,
+  } = useProductDetails({ productId, initialSku })
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["store-product-details", productId],
-    queryFn: ({ signal }) =>
-      baseApi.get<StoreProductDetailResponse>(`/store/products/${productId}`, { signal }),
-    staleTime: 60_000,
+  const {
+    quantity,
+    setQuantity,
+    remainingStock,
+    safeQuantity,
+    isAdding,
+    handleAddToCart,
+  } = useProductPurchase({
+    productId,
+    data,
+    selectedVariant,
+    availableStock,
+    isOutOfStock,
   })
 
-  const defaultSelection = useMemo<Selection>(() => {
-    if (!data?.variants.length) return {}
+  const { isFavorite, isUpdatingFavorite, toggleFavorite } =
+    useProductWishlist(productId)
 
-    const requestedVariant = initialVariantId
-      ? data.variants.find((variant) => variant.id === initialVariantId)
-      : undefined
-
-    const variant =
-      requestedVariant ??
-      data.variants.find((item) => item.isAvailable && item.stock > 0) ??
-      data.variants[0]
-
-    return Object.fromEntries(
-      variant?.options.map((option) => [option.optionId, option.id]) ?? []
-    )
-  }, [data, initialVariantId])
-
-  const selection = userSelection ?? defaultSelection
-  const hasOptions = Boolean(data?.options.length)
-
-  const selectedVariant = useMemo(() => {
-    if (!data?.options.length) return null
-    if (Object.keys(selection).length !== data.options.length) return null
-
-    return (
-      data.variants.find((variant) => matchesSelection(variant, selection)) ??
-      null
-    )
-  }, [data, selection])
-
-  const isVariantOutOfStock = Boolean(
-    selectedVariant && (!selectedVariant.isAvailable || selectedVariant.stock < 1)
-  )
-  const canAdd = !hasOptions || Boolean(selectedVariant)
-
-  const availableStock = hasOptions
-    ? (selectedVariant?.stock ?? 0)
-    : (data?.variants.reduce((total, variant) => total + variant.stock, 0) ?? 0)
-
-  const quantityInCart = cartItems
-    .filter(
-      (item) =>
-        item.productId === productId &&
-        item.variantId === (selectedVariant?.id ?? null)
-    )
-    .reduce((total, item) => total + item.quantity, 0)
-
-  const remainingStock = Math.max(0, availableStock - quantityInCart)
-  const safeQuantity = Math.min(
-    Math.max(quantity, 1),
-    Math.max(remainingStock, 1)
-  )
-
-  const currentImage = data?.images[0]?.imageUrl
-  const currentPrice = Number(data?.sellingPrice ?? 0)
-  const originalPrice = data?.originalPrice
-    ? Number(data.originalPrice)
-    : null
-
-  const handleAddToCart = async () => {
-    if (!data || !canAdd || isVariantOutOfStock || remainingStock < 1) {
-      toast.error(
-        remainingStock < 1
-          ? "This selected variant is currently out of stock."
-          : "Please select an available product option."
-      )
-      return
-    }
-
+  const handleShare = async () => {
+    const url = window.location.href
     try {
-      const addedQuantity = await addItem({
-        productId: data.id,
-        variantId: selectedVariant?.id ?? null,
-        variant: selectedVariant
-          ? {
-              id: selectedVariant.id,
-              sku: selectedVariant.sku,
-              stock: selectedVariant.stock,
-              options: selectedVariant.options,
-            }
-          : null,
-        quantity: safeQuantity,
-        stock: availableStock,
-        name: data.name,
-        price: currentPrice,
-        imageUrl: currentImage ?? null,
-      })
-
-      toast.success(
-        addedQuantity < safeQuantity
-          ? `Added ${addedQuantity} item(s). Maximum available stock reached.`
-          : "Added to cart"
-      )
+      if (navigator.share) {
+        await navigator.share({ title: data?.name ?? "Product", url })
+      } else {
+        await navigator.clipboard.writeText(url)
+        toast.success("Product link copied")
+      }
     } catch (error) {
-      toast.error(getApiErrorMessage(error, "Failed to add product to cart."))
+      if (error instanceof Error && error.name !== "AbortError") {
+        toast.error("Could not share this product")
+      }
     }
   }
 
+  const originalPrice = data?.originalPrice ? Number(data.originalPrice) : null
+  const currentPrice = Number(data?.sellingPrice ?? 0)
+
   if (isLoading) {
     return (
-      <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="grid animate-pulse gap-8 md:grid-cols-2">
-          <div className="aspect-square bg-muted" />
+          <div className="aspect-square rounded-xl bg-muted" />
           <div className="space-y-4">
             <div className="h-5 w-1/3 bg-muted" />
             <div className="h-8 w-3/4 bg-muted" />
@@ -167,7 +93,7 @@ export function ProductDetailsPage({
 
   if (isError || !data) {
     return (
-      <main className="mx-auto flex min-h-[40vh] max-w-7xl flex-col items-center justify-center gap-3 px-4 py-16 text-center">
+      <main className="mx-auto flex min-h-[40vh] max-w-6xl flex-col items-center justify-center gap-3 px-4 py-16 text-center">
         <p className="text-sm text-muted-foreground">
           Could not load this product. It may be unavailable or removed.
         </p>
@@ -179,265 +105,199 @@ export function ProductDetailsPage({
   }
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <Link
-        href="/products"
-        className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
-      >
-        <ArrowLeft className="size-4" />
-        Back to products
-      </Link>
-
-      <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
-        <div className="space-y-3">
-          <div className="relative aspect-square overflow-hidden bg-muted">
-            {currentImage ? (
-              <Image
-                src={currentImage}
-                alt={data.name}
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover"
-              />
-            ) : (
-              <div className="flex size-full items-center justify-center text-sm text-muted-foreground">
-                No image available
-              </div>
-            )}
-            {data.discountPercentage && (
-              <Badge className="absolute top-3 left-3">
-                {data.discountPercentage}% OFF
-              </Badge>
-            )}
+    <main className="mx-auto w-full max-w-6xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
+      <div className="grid min-w-0 gap-8 md:grid-cols-2">
+        <div className="min-w-0 md:flex md:justify-center">
+          <div className="w-full md:max-w-lg">
+            <ProductImageGallery name={data.name} images={data.images} />
           </div>
-
-          {data.images.length > 1 && (
-            <div className="grid grid-cols-5 gap-2">
-              {data.images.slice(0, 5).map((productImage) => (
-                <div
-                  key={productImage.id}
-                  className="relative aspect-square overflow-hidden border border-border bg-muted"
-                >
-                  <Image
-                    src={productImage.imageUrl}
-                    alt={data.name}
-                    fill
-                    sizes="120px"
-                    className="object-cover"
-                  />
-                </div>
-              ))}
-            </div>
-          )}
         </div>
 
-        <div className="min-w-0">
-          <p className="text-sm text-muted-foreground">
-            {data.category.name}
-            {data.brand ? ` · ${data.brand.name}` : ""}
-          </p>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
-            {data.name}
-          </h1>
-          {data.subDescription && (
-            <p className="mt-2 text-sm text-muted-foreground">
-              {data.subDescription}
-            </p>
-          )}
+        <div className="flex min-w-0 flex-col justify-center gap-4">
+          <div className="flex flex-col gap-2">
+            {hasOptions && totalStock > 0 ? (
+              <span className="text-xs font-medium text-green-600 uppercase dark:text-green-500">
+                In Stock: {totalStock}
+              </span>
+            ) : hasOptions ? (
+              <span className="text-xs font-medium text-destructive uppercase">
+                Out of Stock
+              </span>
+            ) : (
+              <span className="text-xs font-medium text-muted-foreground uppercase">
+                No variant inventory
+              </span>
+            )}
 
-          <div className="mt-5 flex flex-wrap items-baseline gap-3">
-            <p className="text-2xl font-semibold text-primary">
-              ৳{currentPrice.toLocaleString("en-BD")}
-            </p>
-            {originalPrice !== null && originalPrice > currentPrice && (
-              <p className="text-base text-muted-foreground line-through">
-                ৳{originalPrice.toLocaleString("en-BD")}
+            <h1 className="text-lg font-semibold tracking-tight">
+              {data.name}
+            </h1>
+            {data.category && (
+              <p className="text-xs text-muted-foreground">
+                {data.category.name}
+                {data.brand ? ` · ${data.brand.name}` : ""}
+              </p>
+            )}
+
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-2xl font-semibold tracking-tight">
+                ৳
+                {currentPrice.toLocaleString("en-BD", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </p>
+              {originalPrice !== null && originalPrice > currentPrice && (
+                <>
+                  <p className="text-sm text-muted-foreground line-through">
+                    ৳
+                    {originalPrice.toLocaleString("en-BD", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </p>
+                  {data.discountPercentage && (
+                    <Badge variant="destructive">
+                      {data.discountPercentage}% OFF
+                    </Badge>
+                  )}
+                </>
+              )}
+            </div>
+            {data.subDescription && (
+              <p className="text-sm text-muted-foreground">
+                {data.subDescription}
               </p>
             )}
           </div>
 
-          {hasOptions ? (
-            <div className="mt-8 space-y-6">
-              {data.options.map((option) => {
-                const isColor = option.type === "COLOR"
-                const selectedValueId = selection[option.id]
+          <Separator />
 
-                return (
-                  <div key={option.id} className="space-y-3">
-                    <Label className="text-xs font-semibold uppercase">
-                      {option.name}:{" "}
-                      <span className="font-normal text-primary">
-                        {option.values.find(
-                          (value) => value.id === selectedValueId
-                        )?.label ?? "Select an option"}
-                      </span>
-                    </Label>
+          {hasOptions && data ? (
+            <ProductOptions
+              data={data}
+              selection={selection}
+              sizeGuide={sizeGuide}
+              onSelect={handleProductSelection}
+            />
+          ) : null}
 
-                    <div className="flex flex-wrap gap-2">
-                      {option.values.map((value) => {
-                        const active = selectedValueId === value.id
-                        const available = data.variants.some(
-                          (variant) =>
-                            variant.isAvailable &&
-                            variant.stock > 0 &&
-                            matchesSelection(variant, {
-                              ...selection,
-                              [option.id]: value.id,
-                            })
-                        )
-
-                        return (
-                          <Button
-                            key={value.id}
-                            type="button"
-                            variant={!isColor && active ? "default" : "outline"}
-                            size={isColor ? "icon" : "sm"}
-                            aria-pressed={active}
-                            aria-label={
-                              isColor
-                                ? `Select color ${value.label}`
-                                : undefined
-                            }
-                            title={value.label}
-                            disabled={!available}
-                            onClick={() => {
-                              const nextSelection = {
-                                ...selection,
-                                [option.id]: value.id,
-                              }
-                              setUserSelection(nextSelection)
-
-                              const nextVariant =
-                                Object.keys(nextSelection).length ===
-                                data.options.length
-                                  ? data.variants.find((variant) =>
-                                      matchesSelection(variant, nextSelection)
-                                    )
-                                  : undefined
-
-                              if (nextVariant) {
-                                router.replace(
-                                  `/products/${productId}?variant=${encodeURIComponent(nextVariant.id)}`,
-                                  { scroll: false }
-                                )
-                              }
-                            }}
-                            className={cn(
-                              "relative",
-                              isColor
-                                ? [
-                                    "hover:border-primary!",
-                                    active && "border-2! border-primary! p-0.5",
-                                  ]
-                                : "min-w-10",
-                              !available && "opacity-40"
-                            )}
-                          >
-                            {isColor ? (
-                              <span
-                                aria-hidden="true"
-                                className="block size-full border border-border/50"
-                                style={{
-                                  backgroundColor:
-                                    value.colorCode ?? "transparent",
-                                }}
-                              />
-                            ) : (
-                              value.label
-                            )}
-                          </Button>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )
-              })}
-
-              {selectedVariant && (
-                <div className="space-y-1 text-xs text-muted-foreground">
-                  <p>SKU: {selectedVariant.sku}</p>
-                  <p>
-                    {selectedVariant.stock > 0
-                      ? `${selectedVariant.stock} available`
-                      : "Out of stock"}
-                  </p>
-                </div>
-              )}
-              {!selectedVariant && (
-                <p className="text-sm text-destructive">
-                  This combination is not available.
-                </p>
-              )}
+          {selectedVariant && (
+            <div className="space-y-1 text-xs text-muted-foreground">
+              <p>
+                SKU:{" "}
+                <span className="font-medium text-foreground">
+                  {selectedVariant.sku}
+                </span>
+              </p>
             </div>
-          ) : (
-            <p className="mt-6 text-sm text-muted-foreground">
-              {availableStock > 0
-                ? `${availableStock} items available`
-                : "Out of stock"}
-            </p>
           )}
 
-          <div className="mt-8 flex flex-wrap items-center gap-4">
-            <div className="flex h-10 items-center border border-border">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                aria-label="Decrease quantity"
-                disabled={safeQuantity <= 1}
-                onClick={() => setQuantity(safeQuantity - 1)}
-              >
-                <Minus className="size-4" />
-              </Button>
-              <span className="min-w-10 text-center text-sm tabular-nums">
-                {safeQuantity}
-              </span>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                aria-label="Increase quantity"
-                disabled={safeQuantity >= remainingStock}
-                onClick={() => setQuantity(safeQuantity + 1)}
-              >
-                <Plus className="size-4" />
-              </Button>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-col gap-2">
+              <Label className="text-xs uppercase">Quantity</Label>
+              <div className="flex w-fit items-center rounded-sm border">
+                <button
+                  type="button"
+                  onClick={() => setQuantity((value) => Math.max(1, value - 1))}
+                  disabled={quantity <= 1 || isOutOfStock}
+                  aria-label="Decrease quantity"
+                  className="flex size-8 items-center justify-center text-sm transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <Minus className="size-4" />
+                </button>
+                <span className="flex h-8 min-w-9 items-center justify-center border-x text-sm font-medium">
+                  {isOutOfStock ? 0 : Math.min(safeQuantity, availableStock)}
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setQuantity((value) => Math.min(remainingStock, value + 1))
+                  }
+                  disabled={isOutOfStock || safeQuantity >= remainingStock}
+                  aria-label="Increase quantity"
+                  className="flex size-8 items-center justify-center text-sm transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <Plus className="size-4" />
+                </button>
+              </div>
             </div>
 
+            <div className="flex items-center">
+              {isOutOfStock ? (
+                <span className="text-xs font-medium text-destructive">
+                  Out of stock
+                </span>
+              ) : (
+                <span className="text-xs text-muted-foreground">
+                  <span className="text-emerald-600 dark:text-emerald-500">
+                    In stock
+                  </span>
+                  {" · "}
+                  {availableStock} left
+                </span>
+              )}
+            </div>
+          </div>
+
+          <Separator />
+
+          <div className="grid grid-cols-2 gap-4">
             <Button
               type="button"
-              className="min-w-48 flex-1 sm:flex-none"
-              disabled={
-                isAdding ||
-                !canAdd ||
-                isVariantOutOfStock ||
-                remainingStock < 1
-              }
+              size="lg"
+              variant="outline"
+              disabled={isAdding || isOutOfStock || remainingStock < 1}
               onClick={() => void handleAddToCart()}
+              className="gap-2"
             >
               <ShoppingCart className="size-4" />
               {isAdding ? "Adding..." : "Add to cart"}
             </Button>
+            <Button
+              type="button"
+              size="lg"
+              disabled={isAdding || isOutOfStock || remainingStock < 1}
+              onClick={() => void handleAddToCart(true)}
+              className="gap-2"
+            >
+              Buy now
+            </Button>
           </div>
 
-          {quantityInCart > 0 && (
-            <p className="mt-3 text-xs text-muted-foreground">
-              {quantityInCart} of this variant already in your cart.{" "}
-              {remainingStock} more available.
-            </p>
-          )}
-
-          {data.description && (
-            <section className="mt-10 border-t border-border pt-6">
-              <h2 className="text-base font-semibold">Product Description</h2>
-              <p className="mt-3 whitespace-pre-line text-sm leading-7 text-muted-foreground">
-                {data.description}
-              </p>
-            </section>
-          )}
+          <div className="flex items-center justify-center gap-6">
+            <button
+              type="button"
+              onClick={toggleFavorite}
+              disabled={isUpdatingFavorite}
+              aria-pressed={isFavorite}
+              className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
+            >
+              <Heart
+                className={`size-3 ${isFavorite ? "fill-current text-destructive" : ""}`}
+              />
+              {isFavorite ? "Favorited" : "Favorite"}
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleShare()}
+              className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <Share2 className="size-3" />
+              Share
+            </button>
+          </div>
         </div>
       </div>
+
+      <ProductBenefits />
+
+      <ProductDescription
+        description={data.description}
+        brandName={data.brand?.name ?? "Undefined"}
+        categoryName={data.category?.name}
+        createdAt={data.createdAt}
+      />
     </main>
   )
 }

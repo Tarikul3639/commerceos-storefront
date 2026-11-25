@@ -25,11 +25,15 @@ export function ProductCardActions({
 
   return (
     <>
-      <div className={`mt-1 flex flex-wrap gap-2 ${isHorizontal ? "sm:mt-2" : ""}`}>
+      <div
+        className={`mt-1 flex flex-wrap gap-2 ${isHorizontal ? "sm:mt-2" : ""}`}
+      >
         <Button
           type="button"
           size="sm"
-          variant={isHorizontal ? "outline" : isOutOfStock ? "secondary" : "default"}
+          variant={
+            isHorizontal ? "outline" : isOutOfStock ? "secondary" : "default"
+          }
           className={`relative isolate w-full overflow-hidden border-border bg-background text-foreground before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:bg-primary before:transition-transform before:duration-300 before:ease-in-out hover:border-primary hover:bg-transparent hover:text-primary-foreground hover:before:scale-x-100 ${isHorizontal ? "sm:h-8 sm:w-auto sm:px-3" : "w-full"}`}
           disabled={isOutOfStock}
           onClick={() => openDialog()}

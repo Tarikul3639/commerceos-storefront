@@ -5,11 +5,7 @@
  */
 
 export type ProductOptionType =
-  | "COLOR"
-  | "SIZE"
-  | "STORAGE"
-  | "CAPACITY"
-  | "CUSTOM"
+  "COLOR" | "SIZE" | "STORAGE" | "CAPACITY" | "CUSTOM"
 
 export interface ProductRelation {
   id: string
@@ -109,4 +105,14 @@ export interface StoreProductsResponse {
   page: number
   limit: number
   totalPages: number
+}
+
+export type ProductSelection = Record<string, string>
+export interface ProductSizeGuide {
+  id: string
+  name: string
+  description: string | null
+  unit: string
+  columns: string[]
+  rows: Record<string, string | number>[]
 }

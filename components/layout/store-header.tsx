@@ -3,21 +3,20 @@
 import { useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { Heart, UserRound } from "lucide-react"
+import { UserRound } from "lucide-react"
 
 import { DesktopNavigation } from "@/components/layout/desktop-navigation"
 import { MobileNavigationDrawer } from "@/components/layout/mobile-navigation-drawer"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { CartSheet } from "@/features/cart/components/cart-sheet"
+import { WishlistSheet } from "@/features/wishlist/components/wishlist-sheet"
 import {
   SearchDialog,
   SearchTrigger,
 } from "@/features/search/components/search-dialog"
 import { storeConfig } from "@/config/store.config"
 import { cn } from "@/lib/utils"
-
-const wishlistLink = { href: "/wishlist", label: "Wishlist" }
 
 /**
  * Renders the complete storefront header, including the sticky masthead and desktop navigation.
@@ -105,20 +104,7 @@ export function StoreHeader() {
                 <span className="hidden md:inline">Account</span>
               </Button>
 
-              <Button
-                asChild
-                type="button"
-                variant="ghost"
-                size="icon"
-                className={cn(
-                  "hidden size-9 shrink-0 text-foreground/80 hover:bg-muted hover:text-primary sm:flex md:h-11 md:w-auto md:flex-col md:gap-0.5 md:px-3 md:text-[11px] md:font-medium"
-                )}
-              >
-                <Link href={wishlistLink.href} aria-label={wishlistLink.label}>
-                  <Heart className="size-5" />
-                  <span className="hidden md:inline">{wishlistLink.label}</span>
-                </Link>
-              </Button>
+              <WishlistSheet />
 
               <ThemeToggle />
 

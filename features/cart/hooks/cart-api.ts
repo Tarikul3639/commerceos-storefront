@@ -23,6 +23,23 @@ export interface ApiCart {
   items: ApiCartItem[]
 }
 
+function isApiCart(value: unknown): value is ApiCart {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "items" in value &&
+    Array.isArray(value.items)
+  )
+}
+
+function assertApiCart(value: unknown): asserts value is ApiCart {
+  if (!isApiCart(value)) {
+    throw new Error(
+      "Invalid cart response from the server. Expected an object containing an items array."
+    )
+  }
+}
+
 export interface CartStockItem {
   productId: string
   variantId: string | null
@@ -84,7 +101,8 @@ export async function fetchCart(): Promise<CartItem[]> {
   console.debug("[Cart] Fetching cart from backend: GET /cart")
 
   try {
-    let cart = await baseApi.get<ApiCart>("/cart")
+    let cart: unknown = await baseApi.get<unknown>("/cart")
+    assertApiCart(cart)
 
     console.debug("[Cart] Backend cart fetched:", {
       itemCount: cart.items.length,
@@ -103,7 +121,8 @@ export async function fetchCart(): Promise<CartItem[]> {
     }
 
     if (guestItems.length > 0) {
-      cart = await baseApi.get<ApiCart>("/cart")
+      cart = await baseApi.get<unknown>("/cart")
+      assertApiCart(cart)
     }
 
     const items = mapApiCart(cart)

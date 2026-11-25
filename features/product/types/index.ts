@@ -12,4 +12,5 @@ export type {
   StoreProductDetailResponse,
   StoreProductVariant,
   StoreProductsResponse,
+  ProductSelection,
 } from "./product.types"

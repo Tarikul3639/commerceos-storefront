@@ -9,13 +9,32 @@ export function HomeClosingSection() {
           aria-hidden="true"
           viewBox="0 0 520 360"
           fill="none"
-          className="pointer-events-none absolute -right-16 -top-12 h-96 w-136 max-w-none text-primary/35 sm:right-0 sm:-top-20"
+          className="pointer-events-none absolute -top-12 -right-16 h-96 w-136 max-w-none text-primary/35 sm:-top-20 sm:right-0"
         >
-          <path d="M258 65 210 91c-12 7-27 8-41 4l-32-10-37 50 53 38-24 133h205l-24-133 53-38-37-50-32 10c-14 4-29 3-41-4l-48-26Z" stroke="currentColor" strokeWidth="1.5" />
-          <path d="M210 91c8 23 25 35 48 35s40-12 48-35M134 135l42 31m210-31-42 31M205 306l7-99m103 99-7-99" stroke="currentColor" strokeOpacity=".65" strokeWidth="1.2" />
-          <path d="M258 126v180m-53-91h106" stroke="currentColor" strokeOpacity=".35" strokeDasharray="4 7" />
+          <path
+            d="M258 65 210 91c-12 7-27 8-41 4l-32-10-37 50 53 38-24 133h205l-24-133 53-38-37-50-32 10c-14 4-29 3-41-4l-48-26Z"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          />
+          <path
+            d="M210 91c8 23 25 35 48 35s40-12 48-35M134 135l42 31m210-31-42 31M205 306l7-99m103 99-7-99"
+            stroke="currentColor"
+            strokeOpacity=".65"
+            strokeWidth="1.2"
+          />
+          <path
+            d="M258 126v180m-53-91h106"
+            stroke="currentColor"
+            strokeOpacity=".35"
+            strokeDasharray="4 7"
+          />
           <circle cx="258" cy="65" r="4" fill="currentColor" />
-          <path d="M70 278c48-30 86-31 123-7m134-2c39-23 78-22 123 8" stroke="currentColor" strokeOpacity=".3" strokeWidth="1.2" />
+          <path
+            d="M70 278c48-30 86-31 123-7m134-2c39-23 78-22 123 8"
+            stroke="currentColor"
+            strokeOpacity=".3"
+            strokeWidth="1.2"
+          />
           <path d="M52 304h416" stroke="currentColor" strokeOpacity=".2" />
         </svg>
 
@@ -33,13 +52,12 @@ export function HomeClosingSection() {
               </span>
             </h2>
             <p className="mt-3 max-w-lg text-sm leading-6 text-background/65">
-              Take another look around and find something that feels just
-              right.
+              Take another look around and find something that feels just right.
             </p>
           </div>
           <Link
             href="/products"
-            className="group relative isolate inline-flex w-fit shrink-0 items-center gap-3 overflow-hidden border border-background/40 px-5 py-3 text-sm font-medium text-background transition-colors duration-300 hover:text-foreground focus-visible:ring-2 focus-visible:ring-background focus-visible:ring-offset-2 focus-visible:ring-offset-foreground focus-visible:outline-none before:absolute before:inset-0 before:-z-10 before:-translate-x-full before:bg-background before:transition-transform before:duration-500 before:ease-out hover:before:translate-x-0 motion-reduce:before:transition-none"
+            className="group relative isolate inline-flex w-fit shrink-0 items-center gap-3 overflow-hidden border border-background/40 px-5 py-3 text-sm font-medium text-background transition-colors duration-300 before:absolute before:inset-0 before:-z-10 before:-translate-x-full before:bg-background before:transition-transform before:duration-500 before:ease-out hover:text-foreground hover:before:translate-x-0 focus-visible:ring-2 focus-visible:ring-background focus-visible:ring-offset-2 focus-visible:ring-offset-foreground focus-visible:outline-none motion-reduce:before:transition-none"
           >
             Explore the collection
             <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" />

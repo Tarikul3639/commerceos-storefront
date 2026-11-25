@@ -1,12 +1,12 @@
 "use client"
 
-import Image from "next/image"
 import Link from "next/link"
-import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react"
+import { ShoppingBag } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { useCart } from "@/features/cart/hooks/use-cart"
+import { CartItem } from "./cart-item"
 
 export function CartPage() {
   const { items, subtotal, totalItems, removeItem, updateQuantity } = useCart()
@@ -43,104 +43,16 @@ export function CartPage() {
       ) : (
         <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
           <section className="space-y-4">
-            {items.map((item) => {
-              const productHref = `/products/${item.productId}${item.variantId ? `?variant=${encodeURIComponent(item.variantId)}` : ""}`
-
-              return (
-                <article
-                  key={item.key}
-                  className="flex gap-4 border-b border-border pb-4"
-                >
-                  <Link
-                    href={productHref}
-                    aria-label={`View ${item.name} details`}
-                    className="relative size-24 shrink-0 bg-muted sm:size-28"
-                  >
-                    {item.imageUrl ? (
-                      <Image
-                        src={item.imageUrl}
-                        alt={item.name}
-                        fill
-                        sizes="112px"
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="flex size-full items-center justify-center">
-                        <ShoppingBag className="size-6 text-muted-foreground" />
-                      </div>
-                    )}
-                  </Link>
-
-                  <div className="min-w-0 flex-1">
-                    <Link
-                      href={productHref}
-                      className="line-clamp-2 font-medium transition-colors hover:text-primary hover:underline"
-                    >
-                      {item.name}
-                    </Link>
-                    {item.variant?.options.length ? (
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {item.variant.options.map((option) => option.label).join(" / ")}
-                      </p>
-                    ) : null}
-                    <p className="mt-1 text-sm font-semibold">
-                      ৳{item.price.toLocaleString("en-BD")}
-                    </p>
-
-                    {item.quantity > item.stock && (
-                      <p className="mt-1 text-xs font-medium text-destructive">
-                        Only {item.stock} item(s) currently available.
-                      </p>
-                    )}
-
-                    <div className="mt-3 flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="icon-xs"
-                        aria-label="Decrease quantity"
-                        disabled={item.quantity <= 1}
-                        onClick={() =>
-                          void update(() =>
-                            updateQuantity(item, item.quantity - 1)
-                          )
-                        }
-                      >
-                        <Minus className="size-3" />
-                      </Button>
-                      <span className="min-w-5 text-center text-sm tabular-nums">
-                        {item.quantity}
-                      </span>
-                      <Button
-                        variant="outline"
-                        size="icon-xs"
-                        aria-label="Increase quantity"
-                        disabled={item.quantity >= item.stock}
-                        onClick={() =>
-                          void update(() =>
-                            updateQuantity(item, item.quantity + 1)
-                          )
-                        }
-                      >
-                        <Plus className="size-3" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon-xs"
-                        aria-label={`Remove ${item.name}`}
-                        className="ml-2 text-destructive"
-                        onClick={() => void update(() => removeItem(item))}
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  <p className="hidden shrink-0 text-sm font-semibold sm:block">
-                    ৳{(item.price * item.quantity).toLocaleString("en-BD")}
-                  </p>
-                </article>
-              )
-            })}
+            {items.map((item) => (
+              <CartItem
+                key={item.key}
+                item={item}
+                onRemove={(cartItem) => void update(() => removeItem(cartItem))}
+                onQuantityChange={(cartItem, quantity) =>
+                  void update(() => updateQuantity(cartItem, quantity))
+                }
+              />
+            ))}
           </section>
 
           <aside className="h-fit border border-border p-5">

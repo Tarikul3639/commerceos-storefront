@@ -6,7 +6,7 @@ export default async function ProductPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ variant?: string }>
+  searchParams: Promise<{ sku?: string }>
 }) {
   const [{ id }, query] = await Promise.all([params, searchParams])
 
@@ -14,9 +14,9 @@ export default async function ProductPage({
     <>
       <RecentlyViewedTracker productId={id} />
       <ProductDetailsPage
-        key={`${id}:${query.variant ?? ""}`}
+        key={`${id}:${query.sku ?? ""}`}
         productId={id}
-        initialVariantId={query.variant ?? null}
+        initialSku={query.sku ?? null}
       />
     </>
   )

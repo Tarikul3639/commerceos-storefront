@@ -29,8 +29,8 @@ export const useRecentlyViewedStore = create<RecentlyViewedState>()(
         set((state) => ({
           items: [
             { productId, viewedAt: new Date().toISOString() },
-            ...state.items.filter((item) => item.productId !== productId)
-          ].slice(0, MAX_RECENTLY_VIEWED_ITEMS)
+            ...state.items.filter((item) => item.productId !== productId),
+          ].slice(0, MAX_RECENTLY_VIEWED_ITEMS),
         }))
       },
 
@@ -49,12 +49,12 @@ export const useRecentlyViewedStore = create<RecentlyViewedState>()(
           ...currentState,
           items: Array.isArray(persistedItems)
             ? persistedItems
-              .filter(
-                (item) =>
-                  typeof item.productId === "string" &&
-                  typeof item.viewedAt === "string"
-              )
-              .slice(0, MAX_RECENTLY_VIEWED_ITEMS)
+                .filter(
+                  (item) =>
+                    typeof item.productId === "string" &&
+                    typeof item.viewedAt === "string"
+                )
+                .slice(0, MAX_RECENTLY_VIEWED_ITEMS)
             : [],
         }
       },

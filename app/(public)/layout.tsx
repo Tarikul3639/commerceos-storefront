@@ -3,6 +3,7 @@ import type { ReactNode } from "react"
 import { Footer } from "@/components/layout/footer"
 import { StoreAnnouncement } from "@/features/announcement/components/store-announcement"
 import { StoreHeader } from "@/components/layout/store-header"
+import { StoreBreadcrumbs } from "@/components/layout/store-breadcrumbs"
 
 /**
  * Wraps public storefront pages with the store announcement, shared masthead and footer.
@@ -14,6 +15,7 @@ export default function PublicLayout({
     <div className="flex min-h-svh flex-col">
       <StoreAnnouncement />
       <StoreHeader />
+      <StoreBreadcrumbs />
       <main className="flex-1">{children}</main>
       <Footer />
     </div>

@@ -33,7 +33,6 @@ export async function HomePage() {
     getBannerSlides("HOME_BOTTOM"),
   ])
 
-
   return (
     <>
       <Banner slides={homeTopBanners} />
