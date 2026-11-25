@@ -82,80 +82,103 @@ export function CartSheet() {
         ) : (
           <>
             <div className="flex-1 space-y-4 overflow-y-auto py-4">
-              {items.map((item) => (
-                <div
-                  key={item.key}
-                  className="flex gap-3 border-b border-border px-2 pb-4 sm:px-4"
-                >
-                  <div className="relative size-20 shrink-0 bg-muted">
-                    {item.imageUrl ? (
-                      <Image
-                        src={item.imageUrl}
-                        alt={item.name}
-                        fill
-                        sizes="80px"
-                        className="rounded object-cover"
-                      />
-                    ) : (
-                      <div className="flex size-full items-center justify-center">
-                        <ShoppingBag className="size-5 text-muted-foreground" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
+              {items.map((item) => {
+                const productHref = `/products/${item.productId}${item.variantId ? `?variant=${encodeURIComponent(item.variantId)}` : ""}`
+                return (
+                  <div
+                    key={item.key}
+                    className="flex gap-3 border-b border-border px-2 pb-4 sm:px-4"
+                  >
                     <Link
-                      href={`/products/${item.productId}`}
-                      className="line-clamp-2 text-sm font-medium transition-colors hover:text-primary hover:underline"
+                      href={productHref}
+                      aria-label={`View ${item.name} details`}
+                      className="relative size-20 shrink-0 bg-muted"
                     >
-                      {item.name}
+                      {item.imageUrl ? (
+                        <Image
+                          src={item.imageUrl}
+                          alt={item.name}
+                          fill
+                          sizes="80px"
+                          className="rounded object-cover"
+                        />
+                      ) : (
+                        <div className="flex size-full items-center justify-center">
+                          <ShoppingBag className="size-5 text-muted-foreground" />
+                        </div>
+                      )}
                     </Link>
-                    <p className="mt-1 text-sm font-semibold">
-                      ৳{item.price.toLocaleString("en-BD")}
-                    </p>
-                    {item.quantity > item.stock && (
-                      <p className="mt-1 text-xs font-medium text-destructive">
-                        Only {item.stock} item(s) currently available.
+
+                    <div className="min-w-0 flex-1">
+                      <Link
+                        href={productHref}
+                        className="line-clamp-2 text-sm font-medium transition-colors hover:text-primary hover:underline"
+                      >
+                        {item.name}
+                      </Link>
+                      {item.variant?.options.length ? (
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {item.variant.options
+                            .map((option) => option.label)
+                            .join(" / ")}
+                        </p>
+                      ) : null}
+
+                      <p className="mt-1 text-sm font-semibold">
+                        ৳{item.price.toLocaleString("en-BD")}
                       </p>
-                    )}
-                    <div className="mt-2 flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="icon-xs"
-                        aria-label="Decrease quantity"
-                        disabled={item.quantity <= 1}
-                        onClick={() =>
-                          void handleQuantity(item, item.quantity - 1)
-                        }
-                      >
-                        <Minus className="size-3" />
-                      </Button>
-                      <span className="min-w-5 text-center text-sm tabular-nums">
-                        {item.quantity}
-                      </span>
-                      <Button
-                        variant="outline"
-                        size="icon-xs"
-                        aria-label="Increase quantity"
-                        disabled={item.quantity >= item.stock}
-                        onClick={() =>
-                          void handleQuantity(item, item.quantity + 1)
-                        }
-                      >
-                        <Plus className="size-3" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon-xs"
-                        aria-label={`Remove ${item.name}`}
-                        className="ml-auto text-destructive"
-                        onClick={() => void handleRemove(item)}
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
+
+                      {item.quantity > item.stock && (
+                        <p className="mt-1 text-xs font-medium text-destructive">
+                          Only {item.stock} item(s) currently available.
+                        </p>
+                      )}
+
+                      <div className="mt-2 flex items-center gap-2">
+                        <div className="flex items-center justify-between w-20 bg-accent">
+                          <Button
+                            variant="ghost"
+                            size="icon-xs"
+                            aria-label="Decrease quantity"
+                            disabled={item.quantity <= 1}
+                            className="hover:text-primary"
+                            onClick={() =>
+                              void handleQuantity(item, item.quantity - 1)
+                            }
+                          >
+                            <Minus className="size-3" />
+                          </Button>
+                          <span className="min-w-5 text-center text-sm tabular-nums">
+                            {item.quantity}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="icon-xs"
+                            aria-label="Increase quantity"
+                            className="hover:text-primary"
+                            disabled={item.quantity >= item.stock}
+                            onClick={() =>
+                              void handleQuantity(item, item.quantity + 1)
+                            }
+                          >
+                            <Plus className="size-3" />
+                          </Button>
+                        </div>
+
+                        <Button
+                          variant="ghost"
+                          size="xs"
+                          aria-label={`Remove ${item.name}`}
+                          className="bg-transparent! text-accent-foreground/60"
+                          onClick={() => void handleRemove(item)}
+                        >
+                          Remove
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
             <SheetFooter className="gap-3 border-t">
               <div className="flex items-center justify-between text-sm">

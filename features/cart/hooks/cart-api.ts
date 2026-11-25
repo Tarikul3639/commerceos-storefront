@@ -1,12 +1,14 @@
 import { baseApi } from "@/lib/api/base-api"
 import { useCartStore } from "@/features/cart/store/cart-store"
 import type { CartItem } from "@/features/cart/types/cart-item"
+import type { CartVariantDetails } from "@/features/product/types"
 import { createCartItemKey } from "@/features/cart/utils/cart-item-key"
 
 export interface ApiCartItem {
   id: string
   productId: string
   variantId: string | null
+  variant: CartVariantDetails | null
   quantity: number
   stock: number
   product: {
@@ -39,6 +41,12 @@ export function mapApiCart({ items }: ApiCart): CartItem[] {
     key: createCartItemKey(item.productId, item.variantId),
     productId: item.productId,
     variantId: item.variantId,
+    variant: item.variant
+      ? {
+          ...item.variant,
+          options: item.variant.options ?? [],
+        }
+      : null,
     quantity: item.quantity,
     stock: item.stock,
     name: item.product.name,
@@ -87,6 +95,7 @@ export async function fetchCart(): Promise<CartItem[]> {
         stock: item.stock,
       })),
     })
+
     const guestItems = getGuestItems()
 
     for (const item of guestItems) {

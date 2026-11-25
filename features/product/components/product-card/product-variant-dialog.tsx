@@ -26,49 +26,13 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { useCart } from "@/features/cart/hooks/use-cart"
+import type {
+  StoreProductDetailResponse,
+  StoreProductVariant,
+} from "@/features/product/types"
 import { baseApi } from "@/lib/api/base-api"
 import { getApiErrorMessage } from "@/lib/api/api-error"
 import { cn } from "@/lib/utils"
-
-interface ProductOptionValue {
-  id: string
-  label: string
-  colorCode: string | null
-}
-
-interface ProductOption {
-  id: string
-  name: string
-  type: string
-  values: ProductOptionValue[]
-}
-
-interface ProductVariantOption {
-  id: string
-  label: string
-  colorCode: string | null
-  optionId: string
-  optionName: string
-  optionType: string
-}
-
-interface ProductVariant {
-  id: string
-  sku: string
-  stock: number
-  isAvailable: boolean
-  options: ProductVariantOption[]
-}
-
-interface ProductDetails {
-  id: string
-  name: string
-  sellingPrice: string
-  originalPrice: string | null
-  images: { id: string; imageUrl: string }[]
-  options: ProductOption[]
-  variants: ProductVariant[]
-}
 
 /** optionId -> selected valueId */
 type Selection = Record<string, string>
@@ -87,7 +51,7 @@ interface ProductVariantDialogProps {
 }
 
 /** True when the variant contains every option value picked so far. */
-function matchesSelection(variant: ProductVariant, selection: Selection) {
+function matchesSelection(variant: StoreProductVariant, selection: Selection) {
   return Object.entries(selection).every(([optionId, valueId]) =>
     variant.options.some(
       (option) => option.optionId === optionId && option.id === valueId
@@ -114,7 +78,7 @@ export function ProductVariantDialog({
   const { data, isLoading, isError } = useQuery({
     queryKey: ["store-product-details", product.id],
     queryFn: ({ signal }) =>
-      baseApi.get<ProductDetails>(`/store/products/${product.id}`, { signal }),
+      baseApi.get<StoreProductDetailResponse>(`/store/products/${product.id}`, { signal }),
     enabled: open,
     staleTime: 0,
     refetchOnMount: true,
@@ -423,6 +387,14 @@ export function ProductVariantDialog({
                 const addedQuantity = await addItem({
                   productId: product.id,
                   variantId: selectedVariant?.id ?? null,
+                  variant: selectedVariant
+                    ? {
+                        id: selectedVariant.id,
+                        sku: selectedVariant.sku,
+                        stock: selectedVariant.stock,
+                        options: selectedVariant.options,
+                      }
+                    : null,
                   quantity: safeQuantity,
                   stock: availableStock,
                   name: product.name,
