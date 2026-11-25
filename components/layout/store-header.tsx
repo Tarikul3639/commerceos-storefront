@@ -11,10 +11,8 @@ import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { CartSheet } from "@/features/cart/components/cart-sheet"
 import { WishlistSheet } from "@/features/wishlist/components/wishlist-sheet"
-import {
-  SearchDialog,
-  SearchTrigger,
-} from "@/features/search/components/search-dialog"
+import { SearchDialog } from "@/features/search/components/search-dialog"
+import { SearchTrigger } from "@/features/search/components/search-trigger"
 import { storeConfig } from "@/config/store.config"
 import { cn } from "@/lib/utils"
 

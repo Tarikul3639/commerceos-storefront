@@ -31,7 +31,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { storeConfig } from "@/config/store.config"
-import { SearchTrigger } from "@/features/search/components/search-dialog"
+import { SearchTrigger } from "@/features/search/components/search-trigger"
 import { cn } from "@/lib/utils"
 
 type NavigationItem = {

@@ -29,6 +29,8 @@ type ProductsListingProps = {
   categories: StoreCategory[]
   brands: StoreBrand[]
   filters: StoreProductFilters
+  title?: string
+  description?: string
 }
 
 /** Interactive catalog toolbar and result grid; all applied filters remain in the URL for sharing. */
@@ -40,6 +42,8 @@ export function ProductsListing({
   categories,
   brands,
   filters,
+  title = "All products",
+  description = "Find the right fit from our complete product collection.",
 }: ProductsListingProps) {
   const router = useRouter()
   const pathname = usePathname()
@@ -134,10 +138,10 @@ export function ProductsListing({
             Explore the collection
           </p>
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            All products<span className="text-primary">.</span>
+            {title}<span className="text-primary">.</span>
           </h1>
           <p className="mt-2 max-w-xl text-xs leading-5 text-muted-foreground sm:text-sm">
-            Find the right fit from our complete product collection.
+            {description}
           </p>
         </div>
 
